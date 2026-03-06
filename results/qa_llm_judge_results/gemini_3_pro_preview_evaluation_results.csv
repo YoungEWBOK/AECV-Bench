@@ -45,7 +45,7 @@ The plan shows a large sliding glass door (indicated by the double-panel symbol)
 0000-0002,cmp3,access_to_terrace,comparison_qa,Which bedroom is most close to the ABRI?,CHAMBRE 3,"Based on the floor plan, **CHAMBRE 3** is the bedroom closest to the ABRI.",1.0,1.0
 0000-0004,ocr1,read_room_label,ocr_qa,What is the area of the small TOILET between the CHAMBRE 1 and the CHAMBRE 2?,2.70 m²,"Based on the architectural drawing, the area of the small toilet (labeled ""TOIL."") located between CHAMBRE 1 and CHAMBRE 2 is **2.70 m²**.",1.0,1.0
 0000-0004,ocr2,read_area_text,ocr_qa,What is the area of the Chambre 2 in square meters?,11.63 m²,"Based on the architectural drawing provided, the area of **Chambre 2** is **11.63 m²**.",1.0,1.0
-0000-0004,sp1,adjacency,spatial_qa,Which room is directly connected to the GARAGE with an internal door?,The A. CUISINE and the ABRI VOITURE.,"Based on the floor plan, the room directly connected to the **GARAGE** with an internal door is the **A.CUIS.** (Arrière Cuisine / Utility Room).",1.0,1.0
+0000-0004,sp1,adjacency,spatial_qa,Which room is directly connected to the GARAGE with an internal door?,The A. CUISINE and the ABRI VOITURE.,"Based on the floor plan, the room directly connected to the **GARAGE** with an internal door is the **A.CUIS.** (Arrière Cuisine / Utility Room).",0.0,0.0
 0000-0004,cnt1,dinning_chairs,counting_qa,How many chairs are shown in the CUISINE room?,Five (5) chairs.,3 chairs,0.0,0.0
 0000-0004,cmp1,largest_bedrooms,comparison_qa,Which bedroom [CHAMBRE] has the largest area?,Chambre 1,"Based on the floor plan, the areas of the bedrooms are:
 
@@ -238,7 +238,7 @@ The ""BATH"" is located at the top of the plan, directly adjacent to the area la
 1.  The **REAR BEDROOM** (located at the top right of the plan).
 2.  The **BEDROOM** located at the **bottom left** (adjacent to the Bath).
 
-The only bedroom with a built-in closet is the one at the bottom right, which has a closet labeled ""CLOSET: 36"" RAISED PLATFORM"". The ""LINEN"" closet shown near the bottom-left bedroom opens into the Hall, not the bedroom.",1.0,1.0
+The only bedroom with a built-in closet is the one at the bottom right, which has a closet labeled ""CLOSET: 36"" RAISED PLATFORM"". The ""LINEN"" closet shown near the bottom-left bedroom opens into the Hall, not the bedroom.",0.0,0.0
 3000-0004,cnt1,count_window,counting_qa,How many windows does the BATH have?,One (1) window,"Based on the floor plan provided, the **BATH** has **1** window. It is located on the exterior wall facing the lower shed roof.",1.0,1.0
 3000-0004,cmp1,largest_bedrooms,comparison_qa,Which bedroom has the largest area?,Bedroom on the bottom/lower left corner,"Based on the dimensions provided in the architectural drawing:
 
@@ -404,7 +404,7 @@ House-Floor-Plans-12-page-1,ocr2,project_name,ocr_qa,What is the project name wr
 
 (Note: The project number is listed as HFH 4BDRM).",1.0,1.0
 House-Floor-Plans-12-page-1,ocr3,scale_reading,ocr_qa,What is the drawing scale indicated at the bottom-left of the sheet?,"1/4"" = 1'-0""","1/4"" = 1'-0""",1.0,1.0
-House-Floor-Plans-12-page-1,sp1,stairs_location,spatial_qa,Where is the main stair located in relation to the 2nd floor plan layout?,The stair is located near the center-right side of the 2nd floor plan.,"Based on the provided 2nd floor plan, the main stair is **centrally located** in the layout. It is positioned to the right of the central hallway, bordered by **Bathroom 2** to the north and **Bedroom 4** to the south.",1.0,1.0
+House-Floor-Plans-12-page-1,sp1,stairs_location,spatial_qa,Where is the main stair located in relation to the 2nd floor plan layout?,The stair is located near the center-right side of the 2nd floor plan.,"Based on the provided 2nd floor plan, the main stair is **centrally located** in the layout. It is positioned to the right of the central hallway, bordered by **Bathroom 2** to the north and **Bedroom 4** to the south.",0.0,0.0
 House-Floor-Plans-12-page-1,cnt1,window_schedule_count,counting_qa,How many window types are listed in the Window Schedule?,Nine (9),"Based on the ""Vented Window Schedule"" shown in the top-left corner of the drawing, there are **8** window types listed (Marks 1, 2, 3, 4, 5, 6, 8, and 9).",0.0,0.0
 House-Floor-Plans-12-page-1,cnt2,door_schedule_count,counting_qa,How many door types are listed in the Door Schedule?,Eighteen (18),"Based on the **Door Schedule** provided in the drawing, there are **4** distinct door types listed:
 

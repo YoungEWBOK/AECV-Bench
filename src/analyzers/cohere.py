@@ -194,7 +194,9 @@ class CohereAnalyzer:
         
         # Step 2: Prepare image
         base64_image = encode_image_to_base64(image_path)
-        data_url = f"data:image/png;base64,{base64_image}"
+        from ..utils.image_utils import get_image_mime_type
+        mime_type = get_image_mime_type(image_path)
+        data_url = f"data:{mime_type};base64,{base64_image}"
         img_name = os.path.basename(image_path)
         
         # Step 3: Prepare headers

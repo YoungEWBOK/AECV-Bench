@@ -84,7 +84,7 @@ The stairwell shares its longest continuous solid wall (vertical, ~10 ft) direct
 3000-0001,sp1,item_location,spatial_qa,Where are the woodstoves located?,Living Room (& Guest Room),**In the Living Room.**,0.0,0.0
 3000-0001,sp2,adjacency,spatial_qa,Which room is directly connected to the MAIN BEDROOM?,the Hall,"**Bath**
 
-The MAIN BEDROOM shares a wall and door directly with the adjacent Bath room (en-suite, with tub and toilet fixtures positioned immediately above it in the plan).",1.0,1.0
+The MAIN BEDROOM shares a wall and door directly with the adjacent Bath room (en-suite, with tub and toilet fixtures positioned immediately above it in the plan).",0.0,0.0
 3000-0001,sp3,closest_to_staircase,spatial_qa,Which space gives the access to the STAIRS from the main bedroom?,the Kitchen,**Hall**,0.0,0.0
 3000-0001,cnt1,count_windows,counting_qa,How many windows are available for the main bedroom?,Two (2) windows,"**2**
 
@@ -97,7 +97,7 @@ UTILITY CLOSET: ~4'-0"" × 5'-6"" (~22 sq ft)",1.0,1.0
 3000-0002,ocr1,read_slope,ocr_qa,What is the roof slope indicated at the back addition?,2.5/12,"**3/12**
 
 The back addition's lean-to/shed roof slope is indicated by the 3/12 notation near the slope line/arrow in the drawing.",0.0,0.0
-3000-0002,ocr2,read_area_text,ocr_qa,What text describes the flooring type in the main bedroom?,"HARDWOOD FLOOR, TYP.",**2x4 HARWOOD FLOOR TYP**,1.0,1.0
+3000-0002,ocr2,read_area_text,ocr_qa,What text describes the flooring type in the main bedroom?,"HARDWOOD FLOOR, TYP.",**2x4 HARWOOD FLOOR TYP**,0.0,0.0
 3000-0002,sp1,adjacency,spatial_qa,Which bedroom is adjacent to the Bath?,Main Bedroom,**Main Bedroom**,1.0,1.0
 3000-0002,cnt1,count_windows,counting_qa,How many windows are available for the main bedroom?,Three (3) windows,"**2**
 
@@ -142,7 +142,7 @@ No window symbols or wall breaks are present in the Bath room on the floor plan.
 3000-0005,ocr1,read_room_label,ocr_qa,What is the name of the room adjacent to the KITCHEN on the right?,MUDROOM,"**Mudroom**
 
 The floor plan shows the Kitchen in the central area, with a small room labeled ""Mud"" (standard abbreviation for Mudroom) directly to its right, sharing a wall and including a WC and adjacent Utility Closet.",1.0,1.0
-3000-0005,ocr2,read_material_label,ocr_qa,What is the minimum clearance specified between the coats room to the stairs?,Minimum of 3',"**3'-4""**",1.0,1.0
+3000-0005,ocr2,read_material_label,ocr_qa,What is the minimum clearance specified between the coats room to the stairs?,Minimum of 3',"**3'-4""**",0.0,0.0
 3000-0005,sp1,room_identification,spatial_qa,What is the name of the room located next to the DINING area on the right?,KITCHEN,**Kitchen**,1.0,1.0
 3000-0005,sp2,access_to_stairs,spatial_qa,Which room gives direct access to the stairs to the upper level?,LIVING ROOM,**Kitchen**,0.0,0.0
 3000-0005,sp3,access_to_outside,spatial_qa,Which room provides direct access to the 3'x4' back stoop?,Mudroom,**Mud room**,1.0,1.0

@@ -81,7 +81,7 @@ The room with the largest area in both floor plans is the ""Sala estar-menjador"
 3000-0002,ocr2,read_area_text,ocr_qa,What text describes the flooring type in the main bedroom?,"HARDWOOD FLOOR, TYP.","HARDWOOD FLOOR, TYP.",1.0,1.0
 3000-0002,sp1,adjacency,spatial_qa,Which bedroom is adjacent to the Bath?,Main Bedroom,The Main Bedroom is adjacent to the Bath.,1.0,1.0
 3000-0002,cnt1,count_windows,counting_qa,How many windows are available for the main bedroom?,Three (3) windows,The main bedroom has two windows available.,0.0,0.0
-3000-0002,cmp1,closest_to_bath,comparison_qa,Which room is closest to the Bath?,Main Bedroom,"[ERROR: 429 Client Error: Too Many Requests for url: https://api.cohere.com/v2/chat: {'id': '190edf9f-f16e-4faf-994e-76c5ae1b65eb', 'message': 'You are past the per-minute request limit for this model, please wait and try again later.'} for data/Use Case 2 - Drawing Understanding/01 - Full Dataset/images\3000-0002.png]",0.0,0.0
+3000-0002,cmp1,closest_to_bath,comparison_qa,Which room is closest to the Bath?,Main Bedroom,The Main Bedroom is closest to the Bath.,1.0,1.0
 3000-0002,cmp2,largest_room,comparison_qa,Which room has the largest area?,Main Bedroom,"To determine which room has the largest area, we need to calculate the area of each room based on the dimensions provided in the floor plan.
 
 - **Main Bedroom**: 14' x 17' = 238 sq ft
@@ -298,4 +298,4 @@ Rinker_051-1,cmp1,largest_footing_type,comparison_qa,Which footing type listed i
 Upon reviewing the schedule, we can see that the footing type with the largest dimensions is ""10'-0"" x 10'-0"" x 18'-0"""". This footing type has a width of 10 feet, a length of 10 feet, and a depth of 18 feet, making it the largest in terms of overall volume and footprint.
 
 Therefore, the footing type listed in the spread footing schedule with the largest dimensions is ""10'-0"" x 10'-0"" x 18'-0"""".",0.0,0.0
-Rinker_051-1,cmp2,thick_footing_type,comparison_qa,Which footing type listed in the spread footing schedule has the largest thickness?,"Footing type F10 (10'-0"" × 10'-0"").","The footing type with the largest thickness in the spread footing schedule is 10'-0""x10'-0""x18'-0"".",1.0,1.0
+Rinker_051-1,cmp2,thick_footing_type,comparison_qa,Which footing type listed in the spread footing schedule has the largest thickness?,"Footing type F10 (10'-0"" × 10'-0"").","The footing type with the largest thickness in the spread footing schedule is 10'-0""x10'-0""x18'-0"".",0.0,0.0

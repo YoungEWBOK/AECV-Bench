@@ -210,7 +210,9 @@ class OpenRouterAnalyzer:
         
         # Step 2: Prepare image
         base64_image = encode_image_to_base64(image_path)
-        data_url = f"data:image/png;base64,{base64_image}"
+        from ..utils.image_utils import get_image_mime_type
+        mime_type = get_image_mime_type(image_path)
+        data_url = f"data:{mime_type};base64,{base64_image}"
         
         # Step 3: Prepare headers
         headers = self._prepare_headers(open_router_api_key)

@@ -186,7 +186,7 @@ House-Floor-Plans-12-page-5,cnt2,sheet_count,counting_qa,"According to the Sheet
 House-Floor-Plans-12-page-5,cmp1,larger_porch,comparison_qa,"Which porch, front or back, has more deck square footage size?",The front porch,The **front porch** has more deck square footage (**front: 84 sq ft** vs **rear: 32 sq ft**).,1.0,1.0
 Rinker_009-1,ocr1,sheet_title,ocr_qa,What is the sheet title printed in the title block on the lower right?,MECHANICAL LEVEL & FIRST FLOOR PLAN,**MECHANICAL LEVEL & FIRST FLOOR PLAN**,1.0,1.0
 Rinker_009-1,ocr2,sheet_number,ocr_qa,What is the sheet number?,A102,The sheet number is **A102**.,1.0,1.0
-Rinker_009-1,ocr3,client_name,ocr_qa,What is the building name indicated near the title block?,"M.E. RINKER, SR. HALL School of Building Construction","**M.E. Rinker, Sr. Hall**",0.0,0.0
+Rinker_009-1,ocr3,client_name,ocr_qa,What is the building name indicated near the title block?,"M.E. RINKER, SR. HALL School of Building Construction","**M.E. Rinker, Sr. Hall**",1.0,1.0
 Rinker_009-1,ocr4,university_name,ocr_qa,Which university is shown on the cover column?,UNIVERSITY OF FLORIDA – GAINESVILLE,**University of Florida** (Gainesville),1.0,1.0
 Rinker_009-1,ocr5,scale_first_floor,ocr_qa,What is the drawing scale for the first floor plan?,"1/8"" = 1'-0""","The **first floor plan** is drawn at **1/8"" = 1'-0""**.",1.0,1.0
 Rinker_009-1,sp1,count_grid_columns,spatial_qa,Which room on the first floor plan is located inside the veritical grid G and I horizontally and grid 1 and 2 vertically?,The Structures Studio (0140),The room located between grid lines **G–I** and **1–2** on the first floor plan is the **Lobby (Entry/Lobby area)**.,0.0,0.0
