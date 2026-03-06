@@ -16,13 +16,20 @@ def extract_model_name(csv_path: str) -> str:
     # Direct mapping for clean display names
     name_mapping = {
         "gemini_3_pro_preview": "Gemini 3 Pro",
+        "gemini_31_pro": "Gemini 3.1 Pro",
+        "openai_gpt_4_vision": "GPT-4o",
         "openai_gpt_52": "OpenAI GPT 5.2",
+        "openai_gpt_53": "OpenAI GPT 5.3",
         "claude_opus_45": "Claude Opus 4.5",
+        "claude_opus_46": "Claude Opus 4.6",
+        "claude_sonnet_46": "Claude Sonnet 4.6",
         "glm_46v": "GLM 4.6v",
         "qwen3_vl_8b_instruct": "Qwen3 VL 8B Instruct",
+        "qwen_35_plus": "Qwen 3.5 Plus",
         "mistral_large_2512": "Mistral Large 3",
         "grok_41_fast": "Grok 4.1 Fast",
         "nvidia_nemotron_nano_12b_v2_vl": "NVIDIA Nemotron 12B VL",
+        "llama_nemotron_embed_vl_1b_v2": "Llama Nemotron Embed VL 1B",
         "amazon_nova_2_lite_v1": "Amazon Nova 2 Lite",
         "cohere_command_a_vision": "Cohere Command A Vision",
     }
@@ -38,15 +45,15 @@ def main():
 
     # Only include models used for QA LLM judge results
     allowed_models = [
-        "gemini_3_pro_preview.csv",
-        "openai_gpt_52.csv",
-        "claude_opus_45.csv",
+        "gemini_31_pro.csv",
+        "claude_opus_46.csv",
+        "openai_gpt_53.csv",
+        "qwen_35_plus.csv",
         "glm_46v.csv",
-        "qwen3_vl_8b_instruct.csv",
-        "mistral_large_2512.csv",
-        "nvidia_nemotron_nano_12b_v2_vl.csv",
         "grok_41_fast.csv",
+        "nvidia_nemotron_nano_12b_v2_vl.csv",
         "amazon_nova_2_lite_v1.csv",
+        "mistral_large_2512.csv",
         "cohere_command_a_vision.csv",
     ]
 
