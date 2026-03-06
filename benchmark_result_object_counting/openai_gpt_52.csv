@@ -118,3 +118,4 @@ name,original,extracted
 6000-0038,"{""Door"":1,""Window"":1,""Space"":1,""Bedroom"":0,""Toilet"":0}","{""Door"":1,""Window"":1,""Space"":1,""Bedroom"":0,""Toilet"":0}"
 6000-0039,"{""Door"":1,""Window"":4,""Space"":4,""Bedroom"":0,""Toilet"":1}","{""Door"":2,""Window"":4,""Space"":4,""Bedroom"":0,""Toilet"":1}"
 6000-0040,"{""Door"":0,""Window"":3,""Space"":1,""Bedroom"":1,""Toilet"":0}","{""Door"":0,""Window"":3,""Space"":2,""Bedroom"":1,""Toilet"":0}"
+2000-0001,"{""Door"":9,""Window"":5,""Space"":11,""Bedroom"":3,""Toilet"":2}","{""Door"":12,""Window"":6,""Space"":13,""Bedroom"":3,""Toilet"":3}"

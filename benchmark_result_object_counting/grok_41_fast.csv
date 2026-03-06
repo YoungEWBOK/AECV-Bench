@@ -116,3 +116,6 @@ name,original,extracted
 6000-0038,"{""Door"":1,""Window"":1,""Space"":1,""Bedroom"":0,""Toilet"":0}","{""Door"":1,""Window"":1,""Space"":1,""Bedroom"":0,""Toilet"":0}"
 6000-0039,"{""Door"":1,""Window"":4,""Space"":4,""Bedroom"":0,""Toilet"":1}","{""Door"":3,""Window"":4,""Space"":5,""Bedroom"":0,""Toilet"":1}"
 6000-0040,"{""Door"":0,""Window"":3,""Space"":1,""Bedroom"":1,""Toilet"":0}","{""Door"":0,""Window"":2,""Space"":3,""Bedroom"":1,""Toilet"":0}"
+6000-0007,"{""Door"":12,""Window"":14,""Space"":6,""Bedroom"":2,""Toilet"":1}","{""Door"":9,""Window"":11,""Space"":9,""Bedroom"":3,""Toilet"":1}"
+6000-0020,"{""Door"":4,""Window"":6,""Space"":5,""Bedroom"":1,""Toilet"":1}","{""Door"":2,""Window"":6,""Space"":3,""Bedroom"":1,""Toilet"":1}"
+6000-0025,"{""Door"":5,""Window"":10,""Space"":4,""Bedroom"":1,""Toilet"":1}","{""Door"":3,""Window"":4,""Space"":3,""Bedroom"":1,""Toilet"":1}"

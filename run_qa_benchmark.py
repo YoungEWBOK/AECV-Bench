@@ -36,15 +36,35 @@ models = [
     #     "model_id": "google/gemini-3-pro-preview",
     #     "note": "Latest flagship model, high-precision multimodal reasoning"
     # },
-    {
-        "name": "Claude Opus 4.5",
-        "model_id": "anthropic/claude-opus-4.5",
-        "note": "Most advanced Opus model, optimized for complex reasoning tasks"
-    },
+    # {
+    #     "name": "Claude Opus 4.5",
+    #     "model_id": "anthropic/claude-opus-4.5",
+    #     "note": "Most advanced Opus model, optimized for complex reasoning tasks"
+    # },
     # {
     #     "name": "Claude Sonnet 4.5",
     #     "model_id": "anthropic/claude-sonnet-4.5",
     #     "note": "Most advanced Sonnet, optimized for real-world agents"
+    # },
+    # {
+    #     "name": "Gemini 3.1 Pro",
+    #     "model_id": "google/gemini-3.1-pro-preview",
+    #     "note": "Gemini 3.1 Pro preview model"
+    # },
+    # {
+    #     "name": "Claude Sonnet 4.6",
+    #     "model_id": "anthropic/claude-sonnet-4.6",
+    #     "note": "Anthropic Claude Sonnet 4.6, latest Sonnet model"
+    # },
+    # {
+    #     "name": "Qwen 3.5 Plus",
+    #     "model_id": "qwen/qwen3.5-plus-02-15",
+    #     "note": "Qwen 3.5 Plus model from February 2025"
+    # },
+    # {
+    #     "name": "Claude Opus 4.6",
+    #     "model_id": "anthropic/claude-opus-4.6",
+    #     "note": "Anthropic Claude Opus 4.6, most advanced Opus model"
     # },
     # {
     #     "name": "Qwen3-VL 8B Instruct",
@@ -66,6 +86,11 @@ models = [
     #     "model_id": "openai/gpt-5.2",
     #     "note": "OpenAI GPT-5.2 model"
     # },
+    {
+        "name": "OpenAI GPT-5.3",
+        "model_id": "openai/gpt-5.3-chat",
+        "note": "OpenAI GPT-5.3 Chat model"
+    },
     # {
     #     "name": "Amazon Nova 2 Lite v1",
     #     "model_id": "amazon/nova-2-lite-v1",
@@ -85,6 +110,11 @@ models = [
     #     "name": "Nvidia Nemotron Nano 12B V2 VL",
     #     "model_id": "nvidia/nemotron-nano-12b-v2-vl",
     #     "note": "Nvidia Nemotron Nano 12B V2 vision-language model"
+    # },
+    # {
+    #     "name": "Llama Nemotron Embed VL 1B V2",
+    #     "model_id": "nvidia/llama-nemotron-embed-vl-1b-v2:free",
+    #     "note": "Nvidia Llama Nemotron Embed VL 1B V2 vision-language model (free)"
     # },
     # {
     #     "name": "GLM-4.6V",
@@ -117,8 +147,10 @@ def ask_question_with_image(image_path: str, question: str, model_name: str, ope
     """
     # Read and encode image
     base64_image = encode_image_to_base64(image_path)
-    data_url = f"data:image/png;base64,{base64_image}"
-    
+    from src.utils.image_utils import get_image_mime_type
+    mime_type = get_image_mime_type(image_path)
+    data_url = f"data:{mime_type};base64,{base64_image}"
+
     # Prepare headers
     headers = {
         "Authorization": f"Bearer {open_router_api_key}",
@@ -245,7 +277,7 @@ def ask_question_with_image_cohere(image_path: str, question: str, model_name: s
                     {
                         "type": "image_url",
                         "image_url": {
-                            "url": f"data:image/png;base64,{base64_image}"
+                            "url": f"data:{get_image_mime_type(image_path)};base64,{base64_image}"
                         }
                     }
                 ]

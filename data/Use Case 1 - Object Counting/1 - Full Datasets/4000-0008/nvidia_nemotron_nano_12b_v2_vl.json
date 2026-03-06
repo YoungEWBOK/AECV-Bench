@@ -1,7 +1,7 @@
 {
-  "Door": 9,
-  "Window": 7,
-  "Space": 12,
+  "Door": 5,
+  "Window": 5,
+  "Space": 10,
   "Bedroom": 2,
   "Toilet": 2
 }

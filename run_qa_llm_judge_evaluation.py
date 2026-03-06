@@ -44,9 +44,20 @@ OFFICIAL_MODEL_NAMES = {
     'mistral_large_2512': 'Mistral Large 3',
     'openai_gpt_51': 'OpenAI GPT-5.1',
     'openai_gpt_52': 'OpenAI GPT-5.2',
+    'openai_gpt_53': 'OpenAI GPT-5.3',
+    'openai_gpt_5_3': 'OpenAI GPT-5.3',
     'amazon_nova_2_lite_v1': 'Amazon Nova 2 Lite v1',
     'cohere_command_a_vision': 'Cohere Command A Vision',
     'nvidia_nemotron_nano_12b_v2_vl': 'Nvidia Nemotron Nano 12B',
+    'llama_nemotron_embed_vl_1b_v2': 'Llama Nemotron Embed VL 1B',
+    'gemini_31_pro': 'Gemini 3.1 Pro',
+    'gemini_3_1_pro': 'Gemini 3.1 Pro',
+    'claude_sonnet_46': 'Claude Sonnet 4.6',
+    'claude_sonnet_4_6': 'Claude Sonnet 4.6',
+    'qwen_35_plus': 'Qwen 3.5 Plus',
+    'qwen_3_5_plus': 'Qwen 3.5 Plus',
+    'claude_opus_46': 'Claude Opus 4.6',
+    'claude_opus_4_6': 'Claude Opus 4.6',
 }
 
 # Standard QA type names mapping
@@ -60,20 +71,29 @@ QA_TYPE_NAMES = {
 # Model display order for visualizations (keywords to match model names)
 # MMLMs on the left, VLMs on the right
 MODEL_DISPLAY_ORDER = [
-    'gemini 3',           # 1. gemini 3
-    'openai gpt-5.2',     # 2. openai 5.2
+    'gemini 3.1',         # 1. gemini 3.1
+    'gemini 3',           # 2. gemini 3
+    'openai gpt-5.3',     # 3a. openai 5.3
+    'openai gpt 5.3',
+    'openai gpt-5.2',     # 3b. openai 5.2
     'openai gpt 5.2',
-    'opus 4.5',           # 3. opus 4.5
+    'opus 4.6',           # 4. opus 4.6
+    'opus 4.5',           # 5. opus 4.5
+    'sonnet 4.6',         # 6. sonnet 4.6
     'claude opus',
-    'mistral large',      # 4. mistral
-    'amazon',             # 5. Amazon Nova
-    'grok',               # 6. grok
-    'qwen3 vl 8b instruct',  # 7. qwen 8b instruct (VLM)
+    'claude sonnet',
+    'mistral large',      # 7. mistral
+    'amazon',             # 8. Amazon Nova
+    'grok',               # 9. grok
+    'qwen 3.5 plus',      # 10. qwen 3.5 plus
+    'qwen3.5',
+    'qwen3 vl 8b instruct',  # 11. qwen 8b instruct (VLM)
     'qwen3-vl 8b',
-    'glm-4.6v',           # 8. glm_46v (VLM)
+    'glm-4.6v',           # 12. glm_46v (VLM)
     'glm 46v',
-    'cohere',             # 9. cohere (VLM)
-    'nvidia',             # 10. nvidia (VLM)
+    'cohere',             # 13. cohere (VLM)
+    'nvidia',             # 14. nvidia (VLM)
+    'llama nemotron',     # 15. llama nemotron embed (VLM)
 ]
 
 # Open-source models (keywords to match model names)
@@ -190,23 +210,22 @@ def create_comparison_visualizations(evaluations: List[Dict], output_dir: str):
     """
     os.makedirs(output_dir, exist_ok=True)
     
-    # Filter out older model versions and auxiliary files from visualizations
-    # Only keep latest models from each vendor
+    # Only include selected models in visualizations
+    ALLOWED_MODELS_FOR_GRAPHS = {
+        'gemini_31_pro',
+        'claude_opus_46',
+        'openai_gpt_53',
+        'qwen_35_plus',
+        'glm_46v',
+        'grok_41_fast',
+        'nvidia_nemotron_nano_12b_v2_vl',
+        'amazon_nova_2_lite_v1',
+        'mistral_large_2512',
+        'cohere_command_a_vision',
+    }
     filtered_evaluations = [
         e for e in evaluations
-        if 'qwen3_vl_8b_thinking' not in e.get('raw_model_name', '').lower()
-        and 'Qwen3 VL 8B Thinking' not in e.get('model_name', '')
-        and 'openai_gpt_51' not in e.get('raw_model_name', '').lower()
-        and 'OpenAI GPT-5.1' not in e.get('model_name', '')
-        and 'openai_gpt_4_vision' not in e.get('raw_model_name', '').lower()
-        and 'gpt_4o' not in e.get('raw_model_name', '').lower()
-        and 'GPT-4o' not in e.get('model_name', '')
-        and 'glm_45v' not in e.get('raw_model_name', '').lower()
-        and 'GLM-4.5V' not in e.get('model_name', '')
-        and 'complete' not in e.get('raw_model_name', '').lower()
-        and 'detailed' not in e.get('raw_model_name', '').lower()
-        and 'Complete' not in e.get('model_name', '')
-        and 'Detailed' not in e.get('model_name', '')
+        if e.get('raw_model_name', '').lower() in ALLOWED_MODELS_FOR_GRAPHS
     ]
     
     # Sort evaluations by score in descending order

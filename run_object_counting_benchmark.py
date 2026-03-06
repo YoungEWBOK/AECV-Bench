@@ -61,6 +61,38 @@ class ModelRegistry:
                 enabled=False
             ),
             ModelConfig(
+                name="Claude Sonnet 4.6",
+                model_id="anthropic/claude-sonnet-4.6",
+                analyzer=analyze_floorplan,
+                provider="openrouter",
+                note="Anthropic Claude Sonnet 4.6, latest Sonnet model",
+                enabled=True
+            ),
+            ModelConfig(
+                name="Claude Opus 4.6",
+                model_id="anthropic/claude-opus-4.6",
+                analyzer=analyze_floorplan,
+                provider="openrouter",
+                note="Anthropic Claude Opus 4.6, most advanced Opus model",
+                enabled=True
+            ),
+            ModelConfig(
+                name="Gemini 3.1 Pro",
+                model_id="google/gemini-3.1-pro-preview",
+                analyzer=analyze_floorplan,
+                provider="openrouter",
+                note="Gemini 3.1 Pro preview model",
+                enabled=True
+            ),
+            ModelConfig(
+                name="Qwen 3.5 Plus",
+                model_id="qwen/qwen3.5-plus-02-15",
+                analyzer=analyze_floorplan,
+                provider="openrouter",
+                note="Qwen 3.5 Plus model from February 2025",
+                enabled=True
+            ),
+            ModelConfig(
                 name="Grok 4.1 Fast",
                 model_id="x-ai/grok-4.1-fast",
                 analyzer=analyze_floorplan,
@@ -91,6 +123,14 @@ class ModelRegistry:
                 provider="openrouter",
                 note="OpenAI GPT-5.2 model, advanced multimodal capabilities",
                 enabled=False
+            ),
+            ModelConfig(
+                name="OpenAI GPT-5.3",
+                model_id="openai/gpt-5.3-chat",
+                analyzer=analyze_floorplan,
+                provider="openrouter",
+                note="OpenAI GPT-5.3 Chat model",
+                enabled=True
             ),
             ModelConfig(
                 name="Amazon Nova 2 Lite v1",
@@ -159,6 +199,14 @@ class ModelRegistry:
                 provider="openrouter",
                 note="NVIDIA Nemotron Nano 12B V2 vision-language model",
                 enabled=False
+            ),
+            ModelConfig(
+                name="Llama Nemotron Embed VL 1B V2",
+                model_id="nvidia/llama-nemotron-embed-vl-1b-v2:free",
+                analyzer=analyze_floorplan_prompt_based,
+                provider="openrouter",
+                note="Nvidia Llama Nemotron Embed VL 1B V2 vision-language model (free)",
+                enabled=True
             ),
 
             # =================================================================

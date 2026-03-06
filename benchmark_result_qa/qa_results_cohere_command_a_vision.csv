@@ -81,7 +81,7 @@ The room with the largest area in both floor plans is the ""Sala estar-menjador"
 3000-0002,ocr2,ocr_qa,read_area_text,What text describes the flooring type in the main bedroom?,"HARDWOOD FLOOR, TYP.","HARDWOOD FLOOR, TYP."
 3000-0002,sp1,spatial_qa,adjacency,Which bedroom is adjacent to the Bath?,Main Bedroom,The Main Bedroom is adjacent to the Bath.
 3000-0002,cnt1,counting_qa,count_windows,How many windows are available for the main bedroom?,Three (3) windows,The main bedroom has two windows available.
-3000-0002,cmp1,comparison_qa,closest_to_bath,Which room is closest to the Bath?,Main Bedroom,"[ERROR: 429 Client Error: Too Many Requests for url: https://api.cohere.com/v2/chat: {'id': '190edf9f-f16e-4faf-994e-76c5ae1b65eb', 'message': 'You are past the per-minute request limit for this model, please wait and try again later.'} for data/Use Case 2 - Drawing Understanding/01 - Full Dataset/images\3000-0002.png]"
+3000-0002,cmp1,comparison_qa,closest_to_bath,Which room is closest to the Bath?,Main Bedroom,The Main Bedroom is closest to the Bath.
 3000-0002,cmp2,comparison_qa,largest_room,Which room has the largest area?,Main Bedroom,"To determine which room has the largest area, we need to calculate the area of each room based on the dimensions provided in the floor plan.
 
 - **Main Bedroom**: 14' x 17' = 238 sq ft

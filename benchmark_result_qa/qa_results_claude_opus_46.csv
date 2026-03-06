@@ -1,0 +1,328 @@
+image_id,qa_id,qa_type,task,question,ground_truth,model_answer
+0000-0001,ocr1,ocr_qa,read_area_text,what is the size of the GARAGE on the left?,39.37 m²,The garage on the left has an area of **39.37 m²**.
+0000-0001,ocr2,ocr_qa,read_area_text,What is the area of the SALON and SEJOUR room in square meters?,47.19 m²,**47.19 m²**
+0000-0001,sp1,spatial_qa,adjacency,Which room is directly connected to the GARAGE with an internal door?,The A. CUISINE,The **CUISINE** (Kitchen) is directly connected to the GARAGE with an internal door.
+0000-0001,sp2,spatial_qa,access_to_terrace,Which room has an openable door to the TERRASSE?,The CUISINE,"The **SALON** (which is part of the main living area) has an openable door leading to the TERRASSE, as indicated by the door swing arc shown on the plan between the SALON and the TERRASSE."
+0000-0001,cnt1,counting_qa,count_bedrooms,How many bedrooms are there on the floor plan?,Two (2) bedrooms,**2 bedrooms** (Chambre 1 – 13.01 m² and Chambre 2 – 12.02 m²).
+0000-0001,cnt2,counting_qa,count_windows,How many windows does Chambre 1 have on the floor plan?,One (1) window.,"**2 windows.**
+
+Chambre 1 has one window on the south (bottom) wall and one window on the east (right) wall."
+0000-0001,cmp1,comparison_qa,largest_bedrooms,Which bedroom [CHAMBRE] has the largest area?,Chambre 1,**CHAMBRE 1** has the largest area at **13.01 m²** (compared to CHAMBRE 2 at 12.02 m²).
+0000-0001,cmp2,comparison_qa,largest_room,Which room has the largest area in m²?,Salon and Sejour,The **Séjour/Salon** (living room) has the largest area at **47.19 m²**.
+0000-0002,ocr1,ocr_qa,read_area_text,What is the area of the BAINS room in square meters?,5.90 m²,The area of the BAINS room is **5.90 m²**.
+0000-0002,sp1,spatial_qa,read_room_label,Which room is directly connected with SEJOUR without an internal door?,The CUISINE,**CUISINE** is directly connected with SEJOUR without an internal door (they share an open passage).
+0000-0002,sp2,spatial_qa,adjacency,Which room is directly connected to the GARAGE with an internal door?,The Lingerie,The **SEJOUR** (living room) is directly connected to the GARAGE with an internal door.
+0000-0002,cnt1,counting_qa,count_bedrooms,How many bedrooms are available on the floor plan?,Three (3) bedrooms.,"**3 bedrooms** (Chambre 1 – 11.01 m², Chambre 2 – 10.09 m², Chambre 3 – 10.10 m²)."
+0000-0002,cnt2,counting_qa,access_doors,How many doors give access to the LINGERIE room?,Three (3) doors.,**1 door** gives access to the LINGERIE room.
+0000-0002,cmp1,comparison_qa,largest_bedrooms,Which bedroom [CHAMBRE] has the largest area?,Chambre 1,**CHAMBRE 1** has the largest area at **11.01 m²**.
+0000-0002,cmp2,comparison_qa,largest_room,Which room has the second largest area?,Garage,"**TERRASSE** (22.00 m²)
+
+The largest room is SEJOUR at 30.67 m², making TERRASSE at 22.00 m² the second largest."
+0000-0002,cmp3,comparison_qa,access_to_terrace,Which bedroom is most close to the ABRI?,CHAMBRE 3,"**CHAMBRE 3** (Bedroom 3) is the closest to the ABRI, as they are directly adjacent to each other along the southern wall of the building."
+0000-0004,ocr1,ocr_qa,read_room_label,What is the area of the small TOILET between the CHAMBRE 1 and the CHAMBRE 2?,2.70 m²,The small toilet (TOIL.) between CHAMBRE 1 and CHAMBRE 2 has an area of **2.70 m²**.
+0000-0004,ocr2,ocr_qa,read_area_text,What is the area of the Chambre 2 in square meters?,11.63 m²,**11.63 m²**
+0000-0004,sp1,spatial_qa,adjacency,Which room is directly connected to the GARAGE with an internal door?,The A. CUISINE and the ABRI VOITURE.,The **ATELIER** (12.67 m²) is directly connected to the GARAGE with an internal door.
+0000-0004,cnt1,counting_qa,dinning_chairs,How many chairs are shown in the CUISINE room?,Five (5) chairs.,"Looking at the CUISINE (kitchen) room, there is a round table with chairs arranged around it.
+
+**6 chairs** are shown around the round table in the CUISINE room."
+0000-0004,cmp1,comparison_qa,largest_bedrooms,Which bedroom [CHAMBRE] has the largest area?,Chambre 1,**CHAMBRE 1** has the largest area at **11.88 m²**.
+0000-0004,cmp2,comparison_qa,largest_room,Which room has the second largest area?,Garage,**GARAGE** with an area of **23.56 m²** (the largest being SÉJOUR at 44.81 m²).
+0000-0004,cmp3,comparison_qa,largest_toilet,"Which toilet( TOILET, W.C or BAINS) has the largest area?",The BAINS.,"**BAINS** has the largest area at **5.90 m²**, compared to TOIL. (2.70 m²) and W.C (1.53 m²)."
+0000-0005,ocr1,ocr_qa,read_room_label,What is the size of the ABRI VOITURE in square meters?,16.00 m²,The ABRI VOITURE is **16.00 m²**.
+0000-0005,ocr2,ocr_qa,read_area_text,What is the area of the BAINS room in square meters?,6.31 m²,The area of the BAINS room is **6.31 m²**.
+0000-0005,sp1,spatial_qa,access_to_terrace,Which bedroom has a window access to the terrace?,Chambre 3,**Chambre 3** has a window access to the terrace.
+0000-0005,cnt1,counting_qa,access_to_degt,How many doors give access to the DEGT space?,Six (6) doors,"Looking at the DEGT space (4.82 m²), I can count the doors shown by their swing arcs giving access to it.
+
+The DEGT space has **4 doors** giving access to it (connecting to Chambre 2, Chambre 3, Bains, and the hallway/W.C. area)."
+0000-0005,cmp1,comparison_qa,largest_bedrooms,Which bedroom [CHAMBRE] has the largest area?,Chambre 1,**CHAMBRE 1** has the largest area at **10.95 m²**.
+0000-0005,cmp2,comparison_qa,largest_room,Which room has the largest area in m²?,SALON and SEJOUR 44.38 m²,The **Séjour/Salon** area has the largest area at **44.38 m²**.
+0000-0005,cmp3,comparison_qa,adjacency,Which bedroom is closer to the W.C?,Chambre 1,**Chambre 1** is closer to the W.C.
+0000-0005,cmp4,comparison_qa,larger_area,"Which room has the larger area, the GARAGE or the ABRI VOITURE?",The GARAGE,"The **GARAGE** has the larger area at **32.88 m²**, compared to the **ABRI VOITURE** at **16.00 m²**."
+1000-0001,ocr1,ocr_qa,read_room_label,What is the listed area of the 'Cuina-Estar-Menjador' on the Planta Baixa?,19.50 m²,"The listed area of the **Cuina-Estar-Menjador** on the Planta Baixa is **19,50 m²**."
+1000-0001,ocr2,ocr_qa,read_area_text,What is the area of 'Dormitori 1' on the Planta Baixa?,8.10 m²,"The area of **Dormitori 1** on the Planta Baixa is **8,10 m²**."
+1000-0001,ocr3,ocr_qa,adjacency,"What is the area of the adjacent room to CUINA-ESTAR-MENJADOR, to the left of the staircase, on Planta PIS 1-2-3?",9.70 m²,"Looking at the Planta PIS 1ª-2ª-3ª floor plan, the room adjacent to CUINA-ESTAR-MENJADOR to the left of the staircase is **DORMITORI** with an area of **9,70 m²**."
+1000-0001,sp1,spatial_qa,titleblock_location,Where is the title block located relative to the entire sheet?,Bottom-right corner,The title block is located in the **bottom-right corner** of the sheet.
+1000-0001,cnt1,counting_qa,count_bedrooms,How many bedrooms (dormitary) are available on the PLANTA BAIXA floor?,Two (2) bedrooms,"Looking at the PLANTA BAIXA floor plan, I can identify **2 bedrooms** (dormitoris):
+
+1. **DORMITORI 1** - 8,10 m²
+2. **DORMITORI 2** - 11,35 m²"
+1000-0001,cmp1,comparison_qa,largest_bedroom,Which bedroom on Planta Baixa floor has the largest area?,Dormitori 2,**Dormitori 2** with **11.35 m²** is the largest bedroom on the Planta Baixa floor.
+1000-0001,cmp2,comparison_qa,largest_room,Which room has the largest area in the drawing?,Cuina-Estar-Menjador (Kitchen–Living–Dining),"**Cuina-Estar-Menjador (Kitchen-Living-Dining room)** in PIS ""4º 1ª"" (DUPLEX) with **21,40 m²** is the largest room shown in the drawing."
+1000-0001,cmp3,comparison_qa,closer_door,Whose DORMITORI door has shorter travelling distance to the TRASTER room on the PLANTA BAIXA floor plan?,The door of Dormitori 1.,"Looking at the PLANTA BAIXA floor plan, I need to compare the travelling distance from each DORMITORI door to the TRASTER room.
+
+- **DORMITORI 1** is located on the right side of the plan, and its door opens into the corridor/distribuidor area relatively close to the TRASTER.
+- **DORMITORI 2** is located further to the right and lower on the plan, requiring a longer path through the distribuidor to reach the TRASTER.
+
+**DORMITORI 1** has the shorter travelling distance to the TRASTER room."
+2000-0002,ocr1,ocr_qa,read_floor_area,What is the listed total square footage of the 1st floor?,914 SQUARE FEET,**914 square feet**
+2000-0002,ocr2,ocr_qa,read_safety_note,What does the safety note say about smoke detectors near the hallway?,All smoke detectors linked w/ battery backup.,"The safety note states: **""ALL SMOKE/CO DETECTORS LINKED W/ BATTERY BACKUP.""**"
+2000-0002,sp1,spatial_qa,kitchen_appliances,Which major appliances are located directly adjacent to the kitchen sink?,Dishwasher and the refrigerator.,"The **dishwasher (DW)** is located on one side of the kitchen sink, and the **refrigerator (REF)** is located on the other side."
+2000-0002,sp2,spatial_qa,adjacency,Which room is directly adjacent to the Pantry?,The Kitchen,The **Kitchen** is directly adjacent to the Pantry.
+2000-0002,sp3,spatial_qa,adjacency,"Which room is positioned directly beside the Stair, sharing the longest adjoining wall?",Bedroom 1,"**Bedroom 1**
+
+Bedroom 1 is positioned directly beside the stair and shares the longest adjoining wall with it."
+2000-0002,cnt1,counting_qa,count_window,How many windows does the bedroom have?,One (1) window.,"**2 windows**
+
+Bedroom 1 has two windows: one on the south (bottom) wall labeled ""EGRESS"" and one on the east (right) wall."
+2000-0002,cmp1,comparison_qa,largest_room,Which room in the plan has the largest area?,Living Room,**Living Room** — it occupies the largest area on the 1st floor plan.
+3000-0001,ocr1,ocr_qa,read_room_label,What is the name of the main bedroom shown in the plan?,MAIN BEDROOM,**MAIN BEDROOM**
+3000-0001,ocr2,ocr_qa,read_area_text,What text describes the flooring type in the living room?,"HARDWOOD FLOOR, TYP.","The flooring type in the living room is described as **""HARDWOOD FLOOR, TYP.""**
+
+Additionally, there is a note for **""30x68 STONE OR TILE FLOORING""** indicating a specific area (likely a hearth pad for the woodstove) within the living room."
+3000-0001,sp1,spatial_qa,item_location,Where are the woodstoves located?,Living Room (& Guest Room),"The woodstove (optional) is located in the **Living Room (& Guest Room)**, positioned on a **30×68 stone or tile flooring** pad near the center-left area of the first floor."
+3000-0001,sp2,spatial_qa,adjacency,Which room is directly connected to the MAIN BEDROOM?,the Hall,The MAIN BEDROOM is directly connected to the **HALL**.
+3000-0001,sp3,spatial_qa,closest_to_staircase,Which space gives the access to the STAIRS from the main bedroom?,the Kitchen,The **HALL** provides access from the Main Bedroom to the Stairs.
+3000-0001,cnt1,counting_qa,count_windows,How many windows are available for the main bedroom?,Two (2) windows,"**2 windows**
+
+The main bedroom has 2 windows — one on the top (north) wall and one on the left (west) wall."
+3000-0001,cmp1,comparison_qa,largest_room,Which room has the largest area?,Living Room (& Guest Room),**Living Room (& Guest Room)** has the largest area.
+3000-0001,cmp2,comparison_qa,bigger_room,"Which one is bigger? the COATS room behind the entrance, or the UTILITY CLOSET room?",The Utility closet,"The **UTILITY CLOSET** is bigger than the COATS room. The Utility Closet appears to be approximately 3'-1"" × 3'-11"", while the Coats closet near the entrance is a smaller space (approximately 2'-2"" × 3'-5"")."
+3000-0002,ocr1,ocr_qa,read_slope,What is the roof slope indicated at the back addition?,2.5/12,The roof slope at the back addition (lean-to roof) is **2.5/12**.
+3000-0002,ocr2,ocr_qa,read_area_text,What text describes the flooring type in the main bedroom?,"HARDWOOD FLOOR, TYP.","**HARDWOOD FLOOR, TYP.**"
+3000-0002,sp1,spatial_qa,adjacency,Which bedroom is adjacent to the Bath?,Main Bedroom,The **Main Bedroom** is adjacent to the Bath.
+3000-0002,cnt1,counting_qa,count_windows,How many windows are available for the main bedroom?,Three (3) windows,"**2 windows**
+
+The main bedroom has two windows — one on the left (west) wall and one on the south (front/porch) wall."
+3000-0002,cmp1,comparison_qa,closest_to_bath,Which room is closest to the Bath?,Main Bedroom,"The **Main Bedroom** is closest to the Bath, as they share a common wall directly adjacent to each other on the left side of the 2nd floor plan."
+3000-0002,cmp2,comparison_qa,largest_room,Which room has the largest area?,Main Bedroom,**Main Bedroom** has the largest area.
+3000-0002,cmp3,comparison_qa,closest_to_staircase,Which room has the closest access to the STAIRS through the hall?,The bedroom,"The **Bedroom** (the right-side bedroom) has the closest access to the stairs (""DOWN"") through the hall, as the stairway is located on the right side of the hall, directly adjacent to that bedroom's door."
+3000-0002,cmp4,comparison_qa,access_to_roof,Which room has a window view access to the back addition lean-to-roof? the bath or the bedroom?,The bath,"**The Bath.**
+
+The Bath has a window on its upper (north) wall that opens toward the back addition lean-to roof area."
+3000-0003,ocr1,ocr_qa,read_room_label,What is the name of the large room on the lower half of the plan?,LIVING / DINING ROOM,**LIVING / DINING ROOM**
+3000-0003,ocr2,ocr_qa,read_door_lable,What is the name of the door that connects the Kitchen and the MUDROOM?,B,The door connecting the Kitchen and the Mudroom is labeled **B**.
+3000-0003,sp1,spatial_qa,kitchen_feature,What major appliance is positioned directly across from the kitchen sink?,The refrigerator (REF).,The **refrigerator (REF)** is positioned directly across from the kitchen sink.
+3000-0003,sp2,spatial_qa,adjacency,Which room is directly connected to the KITCHEN with 32x80 cased opening?,The LIVING/DINING ROOM,The **UTILITY CLOSET** is directly connected to the KITCHEN with the 32x80 cased opening.
+3000-0003,sp3,spatial_qa,access_to_outside,Which room has direct access to the SCREEN PORCH?,Main Bedroom,The **MAIN BEDROOM** has direct access to the SCREEN PORCH.
+3000-0003,cnt1,counting_qa,count_windows,How many windows are available for the living/dinning space?,Four (4),"Looking at the Living/Dining Room area on the floor plan, I can count **4 windows** — two on the bottom (south) wall and two on the left (west) wall."
+3000-0003,cmp1,comparison_qa,largest_room,Which room has the largest area?,Living / Dining Room,**Living / Dining Room** has the largest area.
+3000-0003,cmp2,comparison_qa,close_access,Which room is closely accessible from the living/dinning room? the Screen porch or the mudroom?,The mudroom,"The **Screen Porch** is more closely accessible from the Living/Dining Room. It connects through the Main Bedroom area on the left side, whereas the Mudroom is located at the top right of the plan, accessible primarily through the Kitchen, making it farther from the Living/Dining Room."
+3000-0004,ocr1,ocr_qa,read_slope,What is the slope indicated for the lower shed roof?,2.0/12,**2/12**
+3000-0004,ocr2,ocr_qa,read_area_text,What flooring type is specified for the front bedrooms?,"HARDWOOD FLOOR, TYP.","**Hardwood floor, typical** (as noted ""HARDWOOD FLOOR, TYP."" in the front bedroom area)."
+3000-0004,sp1,spatial_qa,window_shed_roof,Which room has window facing the shed roof?,REAR BEDROOM,The **Rear Bedroom** has a window facing the lower shed roof.
+3000-0004,sp2,spatial_qa,no_built_in_closet,Which bedroom has no built-in closet?,REAR BEDROOM,"The **left bedroom** (the one on the lower-left of the plan) has no built-in closet. The right bedroom has a closet with a 36"" raised platform, and the rear bedroom has its own space, but the left bedroom shows no closet."
+3000-0004,cnt1,counting_qa,count_window,How many windows does the BATH have?,One (1) window,**1 window.**
+3000-0004,cmp1,comparison_qa,largest_bedrooms,Which bedroom has the largest area?,Bedroom on the bottom/lower left corner,The **Rear Bedroom** has the largest area.
+3000-0004,cmp2,comparison_qa,more_windows,Which bedroom has more windows?,Bedroom on the bottom/lower left corner.,"The **left Bedroom** has more windows. It has **2 windows** (one on the left/west wall and one on the bottom/south wall), while the right Bedroom has **1 window** (on the south wall) and the Rear Bedroom has **1 window** (on the right/east wall)."
+3000-0004,cmp3,comparison_qa,fewer_windows,Which bedroom has fewer windows?,Bedroom on the bottom/lower right corner.,"The **Rear Bedroom** has fewer windows — it has **1 window**, while each of the two lower bedrooms has **2 windows**."
+3000-0005,ocr1,ocr_qa,read_room_label,What is the name of the room adjacent to the KITCHEN on the right?,MUDROOM,The room adjacent to the KITCHEN on the right is the **MUDROOM**.
+3000-0005,ocr2,ocr_qa,read_material_label,What is the minimum clearance specified between the coats room to the stairs?,Minimum of 3',"**3' MIN CLEAR**
+
+This is indicated on the drawing between the coats room (closet) and the stairs, labeled as ""3' MIN CLEAR."""
+3000-0005,sp1,spatial_qa,room_identification,What is the name of the room located next to the DINING area on the right?,KITCHEN,The room located next to the DINING area on the right is the **KITCHEN**.
+3000-0005,sp2,spatial_qa,access_to_stairs,Which room gives direct access to the stairs to the upper level?,LIVING ROOM,"The **Living Room** gives direct access to the stairs to the upper level (marked ""UP"" with 14 risers at the right side of the living room)."
+3000-0005,sp3,spatial_qa,access_to_outside,Which room provides direct access to the 3'x4' back stoop?,Mudroom,The **Mudroom** provides direct access to the 3'x4' back stoop.
+3000-0005,cnt1,counting_qa,count_toilet,How many toilets (W.C) does the floor plan have?,One (1) toilet/W.C,"**1 toilet (W.C.)**
+
+The floor plan shows one room labeled **WC**, located off the mudroom area in the upper-right portion of the plan."
+3000-0005,cmp1,comparison_qa,largest_space,Which space has the largest area?,Living Room,**Living Room** has the largest area on the downstairs floor plan.
+3000-0005,cmp2,comparison_qa,larger_space,Which room has more space? the WC or the MUDROOM?,The MUDROOM,The **MUDROOM** has more space than the WC.
+Apple-headquarter-plan-15-page-01,ocr1,ocr_qa,consulting_firms,What are the consulting firms listed in the title block?,"6 consulting firms: Foster + Partners, Arup, OLIN, KIER & WRIGHT, alta and WATRY DESIGN, INC.","The consulting firms listed in the title block are:
+
+1. **Foster + Partners** (Architect)
+2. **ARUP** (Engineering)
+3. **OLIN** (Landscape Architecture and Urban Design)
+4. **Kier & Wright** (Civil Engineering/Survey)
+5. **Alta** (Planning + Design)
+6. **Watry Design, Inc.** (Parking Structure Design)"
+Apple-headquarter-plan-15-page-01,ocr2,ocr_qa,read_titleblock_client,What is the client of the project written on the title block?,Apple Inc.,**Apple Inc.**
+Apple-headquarter-plan-15-page-01,ocr3,ocr_qa,read_project_name,What is the project name written on the title block?,Apple Campus 2,**Apple Campus 2**
+Apple-headquarter-plan-15-page-01,ocr4,ocr_qa,scale_reading,What scale is listed in the title block for this plan?,"1"" = 64'","The scale listed in the title block is **1"" = 64'** (one inch equals sixty-four feet)."
+Apple-headquarter-plan-15-page-01,ocr5,ocr_qa,internal_radius,What is the internal radius of the circular building?,"580'-11""","The internal radius of the circular building (the **outer radius** label on the drawing indicates ~**780'-7""** as the ""Outer radius""), and the internal radius, based on the dimensional annotations visible on the plan, is approximately **735'-7""**.
+
+However, looking more carefully at the drawing, the dimension labeled ""Outer radius"" is **780'-7""**, and the inner concentric circle dimensions show the internal radius is approximately **615'-0""** to **620'-0""**.
+
+Based on the clearest radial dimensions shown on the drawing, the internal radius of the circular (ring) building is approximately **461'-3""**.
+
+Let me reconsider by focusing on the clearly marked dimensions: The drawing shows **""780'-7"" Outer radius""** explicitly labeled. Given the building ring width and the inner courtyard dimensions visible (with radii marked around **245'-8""**, **200'-2""**, etc. for the inner courtyard features), the **internal radius of the main circular building is approximately 735'-7""**.
+
+The internal radius is **735'-7""**."
+Apple-headquarter-plan-15-page-01,ocr6,ocr_qa,external_radius,What is the external (outer) radius of the circular building?,"760'-7""","The external (outer) radius of the circular building is **786'-1""** (as noted on the drawing as ""Outer radius"")."
+Apple-headquarter-plan-15-page-01,ocr7,ocr_qa,restaurant_space,What is the size of Restaurant space in square feet?,"58,000 square feet","**58,000 sq ft**"
+Apple-headquarter-plan-15-page-01,ocr8,ocr_qa,right_side_road,What is the name of the road labeled to the right side of the plan?,TANTAU AVENUE,**TANTAU AVENUE**
+Apple-headquarter-plan-15-page-01,sp1,spatial_qa,adjacency,"Which side of the ring (north, south, east, or west), on the drawing, has the Apple transit center Bus drop off area?",East,"The Apple transit center Bus drop off area is on the **east** side of the ring, adjacent to Tantau Avenue."
+Apple-headquarter-plan-15-page-01,cnt1,counting_qa,count_access_cores,How many labeled access blocks are distributed around the building ring?,Nine (9),"Looking at the drawing, I can count the labeled access blocks (entrance/access points) distributed around the circular ring building.
+
+There are **9** labeled access blocks distributed around the building ring."
+Apple-headquarter-plan-15-page-01,cnt2,counting_qa,count_radial_paths,How many radial pedestrian paths originate from the courtyard center and extend outward?,Nine (9),"Looking at the Apple Campus 2 Level 1 floor plan, I can count the radial pedestrian paths extending outward from the central courtyard area.
+
+**8 radial pedestrian paths** originate from the courtyard center and extend outward through the ring-shaped building to the exterior landscape."
+Apple-headquarter-plan-15-page-01,cmp1,comparison_qa,more_core_access_quadrant,Which quadrant of the circular building is closer to the Tantau Auditorium and Visitor Parking Structure?,Quadrant 4 or the bottom right corner.,"The **southeast quadrant** of the circular building is closest to the Tantau Auditorium and Visitor Parking Structure, which is located along **Tantau Avenue** on the east side of the site, toward the south."
+Apple-headquarter-plan-15-page-02,ocr1,ocr_qa,scale_reading,What is the drawing scale indicated in the title block?,"1"" = 64'","The drawing scale indicated in the title block is **1""=64'** (1 inch = 64 feet)."
+Apple-headquarter-plan-15-page-02,ocr2,ocr_qa,sheet_number,What sheet number is shown for this drawing?,P-8.02,The sheet number shown is **P-8.02**.
+Apple-headquarter-plan-15-page-02,ocr3,ocr_qa,issued_date,When was the issued date for the 'Planned development permit' revision?,08/09/11,"Looking at the revision table in the upper right area of the drawing, the **Planned Development Permit** revision was issued on **2/17/12**."
+Apple-headquarter-plan-15-page-02,sp1,spatial_qa,orientation,Are the access blocks positioned symmetrically across opposite sides of the ring?,"No, not symmetrically.","**Yes.** The access blocks (entry/stair/elevator cores) are positioned symmetrically across opposite sides of the ring. The plan shows these blocks arranged in pairs on diametrically opposite locations around the circular ring building, maintaining bilateral symmetry consistent with the overall design of the Apple Campus 2 main building."
+Apple-headquarter-plan-15-page-02,sp2,spatial_qa,general_notes_location,Where is the General notes section located in the drawing?,The top right corner of the drawing.,The General Notes section is located in the **upper right corner** of the drawing.
+Apple-headquarter-plan-15-page-02,cnt1,counting_qa,count_access_cores,How many labeled access blocks are distributed around the building ring on this sheet?,Nine (9),"Looking at the drawing of Apple Campus 2's Level 2 Main Building plan, I can count the labeled access blocks (stairwells, elevator cores, and access points) distributed around the circular building ring.
+
+There are **8** labeled access blocks distributed around the building ring."
+Apple-headquarter-plan-15-page-02,cnt2,counting_qa,count_radial_dividers,How many radial division lines extend from the center to the ring?,Eight (8),"Looking at the circular plan drawing of Apple Campus 2 (Level 2 Main Building), I can count the radial division lines extending from the center to the outer ring.
+
+**There are 8 radial division lines** extending from the center to the ring.
+
+These radial lines divide the circular building into segments and are marked with angular dimensions (such as 45°-11"", 91°-11"", etc.) around the perimeter."
+Apple-headquarter-plan-15-page-02,cnt3,counting_qa,count_section_callouts,How many section view callouts are present in the drawing?,Three (3),"Looking at the drawing, I can count **0** section view callouts present in this plan drawing.
+
+This is a floor plan (Level 2 Main Building, P-8.02) that shows dimensions, annotations, and spatial layout, but does not contain any section cut callouts (the typical circle-with-line symbols indicating where a section is cut through the plan)."
+Apple-headquarter-plan-15-page-02,cnt4,counting_qa,count_consultants,How many consulting firms are included on this floor plan?,Five (5) consultants.,"Based on the title block area on the right side of the drawing, there are **4** consulting firms listed:
+
+1. **Arup** (Engineering)
+2. **OLIN** (Landscape Architecture and Urban Design)
+3. **Kier & Wright** (Civil Engineering/Surveying)
+4. **Alta** (Planning + Design)
+
+These are in addition to the lead architect, **Foster + Partners**."
+Apple-headquarter-plan-15-page-02,cmp1,comparison_qa,more_core_access_quadrant,Which quadrant of the circular building has more core access?,Quadrant 1 or the top right corner.,"The **south (bottom) quadrant** of the circular building has more core access, as it shows a greater concentration of core elements (stairs, elevators, and service shafts) clustered along the inner ring in that area compared to the other quadrants."
+Apple-headquarter-plan-15-page-07,ocr1,ocr_qa,sheet_title,What is the sheet title printed in the title block?,Main Building Basement Level 1 Stall Size Plan,**Main Building Basement Level 1 Stall Size Plan**
+Apple-headquarter-plan-15-page-07,ocr2,ocr_qa,sheet_number,What sheet number is shown for this drawing?,P-8.09,The sheet number shown is **P-8.09**.
+Apple-headquarter-plan-15-page-07,ocr3,ocr_qa,scale_reading,What is the drawing scale indicated in the title block?,"1"" = 64'","The drawing scale indicated in the title block is **1""=64'** (1 inch = 64 feet)."
+Apple-headquarter-plan-15-page-07,sp1,spatial_qa,legend_location,Where on the sheet is the legend describing the parking space types located?,In the upper-left portion of the drawing area.,"The legend describing the parking space types is located in the **upper-left corner** of the sheet, beneath the title ""Basement Level 01: 1,140 Parking spaces."" It lists Standard, Compact, Accessible, Electrical charging stations, Internal ramps, and Mechanical Shaft with corresponding color swatches."
+Apple-headquarter-plan-15-page-07,sp2,spatial_qa,titleblock_location,Where is the main title block located on the sheet?,Along the right edge near the lower-right corner.,"The main title block is located in the **bottom-right corner** of the sheet, containing the firm logos (Foster + Partners, ARUP, OLIN, Kier & Wright), client name (Apple, Inc.), project name (Apple Campus 2), drawing title, project number, date, and sheet number (P-8.09)."
+Apple-headquarter-plan-15-page-07,cnt1,counting_qa,total_parking_spaces,How many total parking spaces are provided on Basement Level 01 according to the legend?,"1,140 parking spaces","**1,140 parking spaces**"
+Apple-headquarter-plan-15-page-07,cnt2,counting_qa,standard_parking_count,How many Standard parking spaces are indicated in the legend?,394 Standard parking spaces,**394** Standard parking spaces are indicated in the legend.
+Apple-headquarter-plan-15-page-07,cnt3,counting_qa,charging_and_accessible_counts,How many Accessible parking spaces and Electrical charging stations are indicated in the legend?,21 Accessible parking spaces and 270 Electrical charging stations,"According to the legend:
+
+- **Accessible parking spaces:** 21 (8'-0"" x 18'-0"")
+- **Electrical charging stations:** 270 (included in Standard and Compact spaces)"
+Apple-headquarter-plan-15-page-07,cnt4,counting_qa,count_consultants,How many consulting firms are included on this floor plan?,Four (4) consultants.,"Based on the title block area on the right side of the drawing, there are **4** consulting firms:
+
+1. **Foster + Partners** (Architect)
+2. **ARUP** (Engineering)
+3. **OLIN** (Landscape Architecture and Urban Design)
+4. **Kier & Wright** (Civil Engineering/Surveying)"
+Apple-headquarter-plan-15-page-07,cmp1,comparison_qa,no_internal_ramp_quadrant,Which quadrant has no internal ramps?,The 3rd quadrant or the bottom left quadrant.,"Looking at the circular floor plan, the **southeast quadrant** (bottom-right) has no internal ramps.
+
+The internal ramps (shown in red/orange in the legend) are visible in the northwest, northeast, and southwest quadrants, but absent from the southeast quadrant."
+Apple-headquarter-plan-15-page-07,cmp2,comparison_qa,more_internal_ramp_quadrant,Which quadrant has more internal ramps?,The 1st quadrant or the top right quadrant.,"Looking at the drawing, the **southwest (bottom-left) quadrant** has more internal ramps, as indicated by the orange-colored elements representing internal ramps (10% - 8% - 16%) concentrated more heavily in that area of the circular building."
+Apple-headquarter-plan-15-page-13,ocr1,ocr_qa,sheet_title,What is the sheet title printed in the title block?,Proposed Main Building Section Typical Entrance,**Proposed Main Building Section Typical Entrance**
+Apple-headquarter-plan-15-page-13,ocr2,ocr_qa,sheet_number,What sheet number is shown for this drawing?,P-10.00,The sheet number shown is **P-10.00**.
+Apple-headquarter-plan-15-page-13,ocr3,ocr_qa,scale_reading,What is the drawing scale indicated in the title block?,"1/8"" = 1'","The drawing scale indicated in the title block is **1/8"" = 1'**."
+Apple-headquarter-plan-15-page-13,ocr4,ocr_qa,project_number,What is the project number written in the title block?,1858,The project number written in the title block is **1858**.
+Apple-headquarter-plan-15-page-13,ocr5,ocr_qa,top_elevation,What is the elevation of the top of the penthouse?,"El. +237'-4""","The elevation of the top of the penthouse is **EL = 237'-4""**."
+Apple-headquarter-plan-15-page-13,sp1,spatial_qa,mechanical_space_location,Where are the Mechanical Spaces located relative to the central elevator shaft?,"They are located directly to the left and right of the elevator shaft, near the roof.","The Mechanical Spaces (labeled ""Mechanical Equipment"") are located on **both sides** of the central elevator shaft, flanking it to the **left and right** at the **Plant Level** (the uppermost occupied floor, just below the roof)."
+Apple-headquarter-plan-15-page-13,sp2,spatial_qa,section_view_symmetry,Is the section view a complete symmetrical view along the elevator shaft?,"No, it is not a complete symmetrical view along the elevator shaft.","**No.** The section view is not a complete symmetrical view along the elevator shaft. While the elevator shaft is visible near the center of the section, the left and right sides of the building are not mirror images. The left side includes parking levels at the lower floors, while the right side shows lobby spaces at those same levels. Additionally, the stairwells, mechanical equipment areas, and spatial arrangements differ between the two sides, indicating an asymmetrical section."
+Apple-headquarter-plan-15-page-13,cnt1,counting_qa,identify_vertical_elements,How many vertical circulation elements are shown in the section?,Two stairwells and one central elevator shaft.,"**3 vertical circulation elements** are shown in the section: **1 elevator shaft** (labeled ""Elevator Shaft"") and **2 stairwells** (both labeled ""Stairwell""), one on each side of the building."
+Apple-headquarter-plan-15-page-13,cnt2,counting_qa,count_lobby_levels,How many lobby levels are visible in the section?,Six (6) lobby levels.,"Looking at the section drawing, I can count the spaces labeled ""Lobby"" at different levels.
+
+There are **8** lobby levels visible in the section."
+Apple-headquarter-plan-15-page-13,cnt3,counting_qa,parking_levels,How many parking levels are visible below grade?,Two (2) parking levels.,**2 parking levels** are visible below grade (labeled as FFL Level B1 and FFL Level B2).
+Apple-headquarter-plan-15-page-13,cnt4,counting_qa,count_consultants,How many consulting firms are included on this floor plan?,Five (5) consultants.,"Looking at the title block on the right side of the drawing, I can identify the following consulting firms:
+
+1. **Foster + Partners** (Architect)
+2. **ARUP** (Engineering)
+3. **OLIN** (Landscape Architecture and Urban Design)
+4. **Kier & Wright** (Civil Engineering)
+5. **Alta** (Planning + Design)
+
+**5 consulting firms** are included on this floor plan."
+Apple-headquarter-plan-15-page-13,cmp1,comparison_qa,more_stairwell,Which side of the elevator shaft has more stairwell? Left or right?,The right side,"**Right side.**
+
+The stairwell on the right side of the elevator shaft is larger/more prominent than the one on the left side, as visible in the building section drawing."
+House-Floor-Plans-12-page-1,ocr1,ocr_qa,sheet_number,What is the sheet number shown on the bottom-right title block?,A101,**A101**
+House-Floor-Plans-12-page-1,ocr2,ocr_qa,project_name,What is the project name written in the title block?,HOUSE,"**HOUSE**
+37th Ave SE, Lacey, WA 98503"
+House-Floor-Plans-12-page-1,ocr3,ocr_qa,scale_reading,What is the drawing scale indicated at the bottom-left of the sheet?,"1/4"" = 1'-0""","The sheet scale indicated at the bottom-right of the sheet is **1/4"" = 1'-0""**."
+House-Floor-Plans-12-page-1,sp1,spatial_qa,stairs_location,Where is the main stair located in relation to the 2nd floor plan layout?,The stair is located near the center-right side of the 2nd floor plan.,"The main stair is located in the **center of the 2nd floor plan**, positioned between Bedroom 3 and the hallway that provides access to Bedrooms 2, 3, and 4, Bathroom 2, and the storage area. It aligns with the stair location on the 1st floor, situated near the transition zone between the living areas and bedrooms."
+House-Floor-Plans-12-page-1,cnt1,counting_qa,window_schedule_count,How many window types are listed in the Window Schedule?,Nine (9),"Looking at the **Vented Window Schedule**, I can count **8** window types listed (with Type Marks 1 through 8)."
+House-Floor-Plans-12-page-1,cnt2,counting_qa,door_schedule_count,How many door types are listed in the Door Schedule?,Eighteen (18),"Looking at the Door Schedule in the upper right portion of the drawing, I can count the individual rows listing door types.
+
+There are **16** door types listed in the Door Schedule."
+House-Floor-Plans-12-page-1,cnt3,counting_qa,bedroom_distribution,How many bedrooms are located on the 2nd floor?,Three (3) bedrooms.,"Looking at the 2nd floor plan, I can identify **3 bedrooms**: Bedroom 2, Bedroom 3, and Bedroom 4."
+House-Floor-Plans-12-page-1,cnt4,counting_qa,staircase_windows,How many small windows are located for the staircase on the second floor?,Two (2) windows,"Looking at the second floor plan, I can count **2** small windows located at the staircase area."
+House-Floor-Plans-12-page-1,cmp1,comparison_qa,floor_area_comparison,Which level has the larger square footage: the 1st floor or the 2nd floor?,The 1st floor (914 square feet).,"The **2nd floor** has the larger square footage at **906 square feet**, compared to the 1st floor at **914 square feet**.
+
+Wait — let me re-read: the 1st floor is labeled **914 square feet** and the 2nd floor is labeled **906 square feet**.
+
+The **1st floor** has the larger square footage at **914 sq ft** compared to the 2nd floor's **906 sq ft**."
+House-Floor-Plans-12-page-1,cmp2,comparison_qa,more_bedrooms,Which floor plan has more bedrooms?,The 2nd floor.,"The **2nd floor** has more bedrooms. It contains **3 bedrooms** (Bedroom 2, Bedroom 3, and Bedroom 4), while the **1st floor** has only **1 bedroom** (Bedroom 1)."
+House-Floor-Plans-12-page-3,ocr1,ocr_qa,sheet_number,What is the sheet number shown in the title block?,A201,**A201**
+House-Floor-Plans-12-page-3,ocr2,ocr_qa,sheet_title,What is the sheet title printed in the title block?,ELEVATIONS,**ELEVATIONS**
+House-Floor-Plans-12-page-3,ocr3,ocr_qa,slope_reading,What is the slope of the roof shown on the Front elevation?,6.0/12,The slope of the roof shown on the Front elevation is **5:12**.
+House-Floor-Plans-12-page-3,sp1,spatial_qa,entry_location_front,Where is the main entry door located on the Front elevation?,Centered under the small gable roof.,"The main entry door on the Front elevation is located on the **left side** of the façade, at the ground/first floor level, sheltered beneath the covered porch area."
+House-Floor-Plans-12-page-3,cnt1,counting_qa,elevation_count,How many building elevations are shown on this sheet?,Four (4),"**4 building elevations** are shown on this sheet: Front, Right, Rear, and Left."
+House-Floor-Plans-12-page-3,cnt2,counting_qa,front_windows,How many windows are shown on the Front elevation?,Four (4) windows.,"Looking at the Front elevation (labeled as view 1, top left), I can count **5 windows**."
+House-Floor-Plans-12-page-3,cnt3,counting_qa,rear_windows,How many windows are shown on the Rear elevation?,Three (3) windows.,"Looking at the **Rear elevation** (labeled as view 3, bottom left), I can count **5 windows**."
+House-Floor-Plans-12-page-3,cnt4,counting_qa,right_elevation_windows,How many windows appear on the Right elevation?,Three (3) windows.,"Looking at the **Right elevation** (labeled as view 2, upper right area of the drawing), I count **3 windows**."
+House-Floor-Plans-12-page-3,cnt5,counting_qa,gable_roof_count,How many gable roofs does the building have?,Three (3) gable roofs.,"**2 gable roofs.**
+
+The front elevation shows two distinct gable forms: a main gable roof over the two-story portion and a smaller, lower gable roof over the single-story portion (likely a garage or front section)."
+House-Floor-Plans-12-page-3,cnt6,counting_qa,left_elevation_windows,How many windows appear on the left elevation?,Two (2) windows.,"Looking at the **Left Elevation** (view 4, bottom right of the drawing), there are **3 windows**."
+House-Floor-Plans-12-page-3,cmp1,comparison_qa,roof_slope_consistency,Does the roof slope identically in the Front and Rear elevations?,Yes.,"Yes. The Front and Rear elevations show the same roof slope, which appears to be **5:12** as indicated on the Front elevation. Both elevations depict the same gable roof profile with identical pitch on each side."
+House-Floor-Plans-12-page-3,cmp2,comparison_qa,more_window,Which view has more windows? the Front or Rear view?,The Front view.,"**The Front view has more windows.**
+
+The Front elevation shows approximately 5–6 windows, while the Rear elevation shows approximately 3–4 windows (including smaller ones)."
+House-Floor-Plans-12-page-4,ocr1,ocr_qa,roof_insulation_type,What insulation type is noted inside the roof assembly on the wall section view?,R-38 Batt Insulation.,"**R-38 Batt Insulation**
+
+This is noted inside the roof assembly in the wall section view, installed between the roof trusses/framing members."
+House-Floor-Plans-12-page-4,ocr2,ocr_qa,sheet_number,What is the sheet number in the title block?,A302,**A302**
+House-Floor-Plans-12-page-4,ocr3,ocr_qa,sheet_title,What is the sheet title printed at the bottom of the page?,BUILDING SECTIONS,**BUILDING SECTIONS**
+House-Floor-Plans-12-page-4,ocr4,ocr_qa,porch_floor,"According to the section view - porch detail, what is the max rise and min run of the stairs?","Max rise: 7'-3/4"", Min run: 10"".","Based on the section view - porch detail, the stairs have:
+
+- **Max Rise: 7 3/4""**
+- **Min Run: 10""**"
+House-Floor-Plans-12-page-4,sp1,spatial_qa,crawlspace_location,Where is the crawlspace shown in the bottom-right building section?,"Below the first floor, at the bottom left portion of the section.","The crawlspace is shown **beneath the floor of the right-side portion of the building**, at the lowest level of **Building Section 1** (bottom-right of the sheet). It is the unfinished space between the ground (with .006 black poly vapor barrier over the soil) and the first-floor framing above, located under the single-story section on the right side of the structure. It is explicitly labeled **""CRAWL SPACE""** in that area."
+House-Floor-Plans-12-page-4,cnt1,counting_qa,section_count,How many building sections are shown on this sheet? and what are the section names?,"Four (4) sections. 1-Building Section, 2-Wall Section, 3-Typ Porch - Flashing detail, and 4-Section view - porch","## Building Sections on Sheet A302
+
+There are **4** sections shown on this sheet:
+
+1. **Section 1: BUILDING SECTION** (Detail 1/A302) — Scale: 3/8"" = 1'-0""
+2. **Section 2: WALL SECTION** (Detail 2/A302) — Scale: 3/4"" = 1'-0""
+3. **Section 3: TYP. PORCH - FLASHING DETAIL** (Detail 3/A302) — Scale: 1 1/2"" = 1'-0""
+4. **Section 4: SECTION VIEW - PORCH** (Detail 4/A302) — Scale: 1"" = 1'-0"""
+House-Floor-Plans-12-page-4,cmp1,comparison_qa,roof_pitch_view,Which view provides the most detailed information about the roof pitch?,The wall section view,"## Building Section (Detail 1, A302)
+
+The **Building Section** (Detail 1 at the bottom center, scale 3/8"" = 1'-0"") provides the most detailed information about the roof pitch. It clearly shows the **prefab scissor trusses** with the roof slope annotated, depicting the pitch angle and the full roof profile from ridge to eave, including the continuous ridge vent and truss spacing (24"" O.C.)."
+House-Floor-Plans-12-page-4,cmp2,comparison_qa,section_for_stairs,Which view gives better information about the section view of the stairs?,The building section view.,"## Building Section (View 1/A302)
+
+The **Building Section** (Detail **1/A302**, at 3/8"" = 1'-0"" scale, shown in the lower right area of the sheet) provides the best information about the section view of the stairs. This view clearly shows the stair profile, including the rise and run dimensions (max rise 7-3/4"", min run 10""), the handrail/guardrail on one side (34"" min height), nosing details (3/4 to 1-1/8""), and the relationship of the stairs to the surrounding floor levels (1st floor and 2nd floor elevations) and the supporting framing (3-1/8"" x 8"" parallam, joist hangers, and double rim joists)."
+House-Floor-Plans-12-page-5,ocr1,ocr_qa,living_area,What is the living area square footage of the first floor?,846 square feet.,"Looking at the **LIVING AREA SQ. FOOTAGE** table on the drawing:
+
+**P.F.L. 1st FLR: 842 SF**
+
+The first floor living area is **842 square feet**."
+House-Floor-Plans-12-page-5,ocr2,ocr_qa,sheet_title,What is the sheet title printed at the bottom-left of the page?,COVER SHEET,The sheet title printed at the bottom-left of the page is **COVER SHEET**.
+House-Floor-Plans-12-page-5,ocr3,ocr_qa,sheet_number,What is the sheet number shown in the title block?,G001,The sheet number shown in the title block is **G001**.
+House-Floor-Plans-12-page-5,ocr4,ocr_qa,deck_area,"According to the 'Deck Square Footage' table, what is the front porch area?",84 square feet.,"According to the **Deck Square Footage** table, the **Front Porch** area is **64 square feet**."
+House-Floor-Plans-12-page-5,ocr5,ocr_qa,abbreviation_column,"According to the abbreviation column, what is 'IRC' stand for?",International Residential Code.,"According to the abbreviation column, **IRC** stands for **International Residential Code**."
+House-Floor-Plans-12-page-5,sp1,spatial_qa,map_orientation,Which side of the sheet contains the location map?,Bottom-right quadrant.,The **right side** of the sheet contains the location map (shown in the lower-right area of the cover sheet).
+House-Floor-Plans-12-page-5,sp2,spatial_qa,rendering_position,Where is the exterior rendering of the house located on the sheet?,Upper-right quadrant.,"The exterior rendering of the house is located in the **upper right area** of the sheet, specifically in the right-hand portion of the cover sheet (G001), above the site plan and to the right of the general notes and abbreviations sections."
+House-Floor-Plans-12-page-5,sp3,spatial_qa,legend_location,Where is the symbol legend located on the sheet with respect to the sheet list table?,Directly on the left side of the sheet list table.,"The **Symbol Legend** is located **below** (and slightly to the left of) the **Sheet List table**. Both are positioned in the right-center area of the cover sheet, with the Sheet List table appearing above and the Symbol Legend directly beneath it."
+House-Floor-Plans-12-page-5,cnt1,counting_qa,count_abbreviations,How many abbreviation columns are shown on the left side of the sheet?,Three (3) columns.,"Looking at the abbreviation section on the left side of the sheet, there are **6** abbreviation columns shown (organized alphabetically from A through Y/Z, arranged in 6 vertical columns across the abbreviations section)."
+House-Floor-Plans-12-page-5,cnt2,counting_qa,sheet_count,"According to the Sheet List, how many sheets are included in this drawing set?",Eight (8) sheets.,"Looking at the **Sheet List** in the upper right area of the drawing, the following sheets are listed:
+
+1. G001 – COVER SHEET
+2. A100 – FLOOR PLAN
+3. A200 – BUILDING SECTION
+4. A201 – WALL SECTION
+5. A300 – INTERIOR ELEVATION
+6. A400 – LEVEL WITH ELEVATION
+
+**There are 6 sheets** included in this drawing set."
+House-Floor-Plans-12-page-5,cmp1,comparison_qa,larger_porch,"Which porch, front or back, has more deck square footage size?",The front porch,"The **front porch** has more deck square footage.
+
+- **Front Porch:** 64 square feet
+- **Rear Porch:** 32 square feet"
+Rinker_009-1,ocr1,ocr_qa,sheet_title,What is the sheet title printed in the title block on the lower right?,MECHANICAL LEVEL & FIRST FLOOR PLAN,**MECHANICAL LEVEL & FIRST FLOOR PLAN**
+Rinker_009-1,ocr2,ocr_qa,sheet_number,What is the sheet number?,A102,The sheet number is **A102**.
+Rinker_009-1,ocr3,ocr_qa,client_name,What is the building name indicated near the title block?,"M.E. RINKER, SR. HALL School of Building Construction","**M.E. RINKER, Sr. HALL** — School of Building Construction, University of Florida Gainesville."
+Rinker_009-1,ocr4,ocr_qa,university_name,Which university is shown on the cover column?,UNIVERSITY OF FLORIDA – GAINESVILLE,"**University of Florida, Gainesville**"
+Rinker_009-1,ocr5,ocr_qa,scale_first_floor,What is the drawing scale for the first floor plan?,"1/8"" = 1'-0""","**1/8"" = 1'-0""**"
+Rinker_009-1,sp1,spatial_qa,count_grid_columns,Which room on the first floor plan is located inside the veritical grid G and I horizontally and grid 1 and 2 vertically?,The Structures Studio (0140),"Looking at the first floor plan, the room located between vertical grids G and I and horizontal grids 1 and 2 is the **Structures** room (labeled as a structures laboratory/classroom)."
+Rinker_009-1,sp2,spatial_qa,room_orientation,"In the first floor plan, is the M.E.P Studio room located north or south of the central corridor?",South of the central corridor,"## Answer
+
+The **M.E.P. Studio** room is located **south** of the central corridor in the first floor plan."
+Rinker_009-1,sp3,spatial_qa,mech_vs_floor_location,Which half of the sheet contains the mechanical level plan?,The upper half of the sheet.,The **top half** of the sheet contains the Mechanical Level Plan.
+Rinker_009-1,sp4,spatial_qa,mech_vs_floor_location,Where is the soil and concrete lab located with respect to the structures studio on first floor?,The soil and concrete lab is located to the right of the structures studio.,"The **Soil and Concrete Lab** is located **to the east (right)** of the **Structures Studio** on the first floor plan. They are adjacent rooms, with the Soil and Concrete Lab immediately next to the Structures Studio along the same corridor."
+Rinker_009-1,cnt1,counting_qa,elevator_shaft,How many elevator shafts are shown in the building plan?,One (1) elevator shaft.,"**1 elevator shaft**
+
+The plan shows one elevator shaft, labeled ""ELEVATOR PIT SEE STRUCT."" located in the upper-left portion of the mechanical level plan."
+Rinker_009-1,cmp1,comparison_qa,largest_room,"Which room is largest? The Structures studio, M.E.P studio, or the soil and concrete lab?",The M.E.P studio,The **Structures Studio** is the largest of the three rooms.
+Rinker_051-1,ocr1,ocr_qa,column_size_lookup,"According to the column size schedule, what is the cross-section of C2 on the second floor?",W12×79 column section.,"Based on the Column Schedule shown in the lower left portion of the drawing, the cross-section of **C2 on the 2nd Floor** is **8×8** (inches)."
+Rinker_051-1,ocr2,ocr_qa,sheet_title,What is the sheet title printed in the title block?,FOUNDATION SLAB-ON-GRADE PLAN,**FOUNDATION SLAB-ON-GRADE PLAN**
+Rinker_051-1,ocr3,ocr_qa,drawing_number,What is the drawing number shown on this drawing?,S1.0,The drawing number is **S1.0**.
+Rinker_051-1,ocr4,ocr_qa,issued_date,When was the issued date for this drawing?,11-21-01,"The issued date for this drawing is **11-21-01** (November 21, 2001)."
+Rinker_051-1,sp1,spatial_qa,grid_zone_identification,Which footing type is located at the intersection of gridlines C and 4?,Footing type F1.,"Looking at the foundation plan at the intersection of gridlines C and 4, the footing designation shown is **F1/F2**."
+Rinker_051-1,sp2,spatial_qa,directional_relationship,Is the cast-in-place concrete stair enclosure located east or west of the gridline labeled 'K'?,East of gridline K.,"The cast-in-place concrete stair enclosure is located **east** of gridline 'K' (between gridlines K and L, as labeled on the right side of the plan)."
+Rinker_051-1,cnt1,counting_qa,footing_typology,How many footing typology are available on the spread footing schedule?,Seven (7) footing types,"Based on the Spread Footing Schedule shown on the drawing, there are **5** footing typologies (F1, F2, F3, F4, and F5)."
+Rinker_051-1,cmp1,comparison_qa,largest_footing_type,Which footing type listed in the spread footing schedule has the largest dimensions?,"Footing type F10 (10'-0"" × 10'-0"").","Looking at the Spread Footing Schedule on the drawing, footing type **F5** has the largest dimensions, with a plan size of **10'-0"" x 10'-0""**."
+Rinker_051-1,cmp2,comparison_qa,thick_footing_type,Which footing type listed in the spread footing schedule has the largest thickness?,"Footing type F10 (10'-0"" × 10'-0"").","Looking at the Spread Footing Schedule on the drawing, footing type **F3** has the largest thickness."
