@@ -20,6 +20,7 @@ def extract_model_name(csv_path: str) -> str:
         "openai_gpt_4_vision": "GPT-4o",
         "openai_gpt_52": "OpenAI GPT 5.2",
         "openai_gpt_53": "OpenAI GPT 5.3",
+        "openai_gpt_54": "OpenAI GPT 5.4",
         "claude_opus_45": "Claude Opus 4.5",
         "claude_opus_46": "Claude Opus 4.6",
         "claude_sonnet_46": "Claude Sonnet 4.6",
@@ -47,7 +48,7 @@ def main():
     allowed_models = [
         "gemini_31_pro.csv",
         "claude_opus_46.csv",
-        "openai_gpt_53.csv",
+        "openai_gpt_54.csv",
         "qwen_35_plus.csv",
         "glm_46v.csv",
         "grok_41_fast.csv",

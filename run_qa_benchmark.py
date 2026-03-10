@@ -86,10 +86,15 @@ models = [
     #     "model_id": "openai/gpt-5.2",
     #     "note": "OpenAI GPT-5.2 model"
     # },
+    # {
+    #     "name": "OpenAI GPT-5.3",
+    #     "model_id": "openai/gpt-5.3-chat",
+    #     "note": "OpenAI GPT-5.3 Chat model"
+    # },
     {
-        "name": "OpenAI GPT-5.3",
-        "model_id": "openai/gpt-5.3-chat",
-        "note": "OpenAI GPT-5.3 Chat model"
+        "name": "OpenAI GPT-5.4",
+        "model_id": "openai/gpt-5.4",
+        "note": "OpenAI GPT-5.4 model"
     },
     # {
     #     "name": "Amazon Nova 2 Lite v1",

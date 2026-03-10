@@ -7,19 +7,20 @@ MODEL RANKINGS (by Overall Score)
 1. Gemini 3.1 Pro                 | Overall: 0.8646 | Questions: 192
 2. Gemini 3                       | Overall: 0.8385 | Questions: 192
 3. Qwen 3.5 Plus                  | Overall: 0.8229 | Questions: 192
-4. OpenAI GPT-5.2                 | Overall: 0.7969 | Questions: 192
-5. OpenAI GPT-5.3                 | Overall: 0.7344 | Questions: 192
-6. Claude Sonnet 4.6              | Overall: 0.7292 | Questions: 192
-7. Claude Opus 4.6                | Overall: 0.7240 | Questions: 192
-8. Claude Opus 4.5                | Overall: 0.7188 | Questions: 192
-9. GLM-4.6V                       | Overall: 0.7135 | Questions: 192
-10. Qwen3 VL 8B Instruct           | Overall: 0.6042 | Questions: 192
-11. Mistral Large 3                | Overall: 0.5938 | Questions: 192
-12. Amazon Nova 2 Lite v1          | Overall: 0.5729 | Questions: 192
-13. Nvidia Nemotron Nano 12B       | Overall: 0.5677 | Questions: 192
-14. GPT-4o                         | Overall: 0.5677 | Questions: 192
-15. Cohere Command A Vision        | Overall: 0.5573 | Questions: 192
-16. Grok 4.1 Fast                  | Overall: 0.2969 | Questions: 192
+4. OpenAI GPT-5.4                 | Overall: 0.8125 | Questions: 192
+5. OpenAI GPT-5.2                 | Overall: 0.7969 | Questions: 192
+6. OpenAI GPT-5.3                 | Overall: 0.7344 | Questions: 192
+7. Claude Sonnet 4.6              | Overall: 0.7292 | Questions: 192
+8. Claude Opus 4.6                | Overall: 0.7240 | Questions: 192
+9. Claude Opus 4.5                | Overall: 0.7188 | Questions: 192
+10. GLM-4.6V                       | Overall: 0.7135 | Questions: 192
+11. Qwen3 VL 8B Instruct           | Overall: 0.6042 | Questions: 192
+12. Mistral Large 3                | Overall: 0.5938 | Questions: 192
+13. Amazon Nova 2 Lite v1          | Overall: 0.5729 | Questions: 192
+14. Nvidia Nemotron Nano 12B       | Overall: 0.5677 | Questions: 192
+15. GPT-4o                         | Overall: 0.5677 | Questions: 192
+16. Cohere Command A Vision        | Overall: 0.5573 | Questions: 192
+17. Grok 4.1 Fast                  | Overall: 0.2969 | Questions: 192
 
 ================================================================================
 DETAILED METRICS BY MODEL
@@ -422,6 +423,139 @@ Accuracy Score: 0.8229 (±0.3817)
   QA Type Breakdown:
     - Comparative Reasoning    : 0.7727 (n=44)
     - Instance Counting        : 0.7381 (n=42)
+    - Text Extraction (OCR)    : 0.9231 (n=65)
+    - Spatial Reasoning        : 0.8049 (n=41)
+
+OpenAI GPT-5.4
+--------------------------------------------------------------------------------
+Total Questions: 192
+Accuracy Score: 0.8125 (±0.3903)
+  (Evaluated using LLM-as-Judge: binary scoring)
+
+  Task Breakdown:
+    - Abbreviation Column      : 1.0000 (n=1)
+    - Access Doors             : 0.0000 (n=1)
+    - Access To Degt           : 0.0000 (n=1)
+    - Access To Outside        : 1.0000 (n=2)
+    - Access To Roof           : 1.0000 (n=1)
+    - Access To Stairs         : 1.0000 (n=1)
+    - Access To Terrace        : 0.6667 (n=3)
+    - Adjacency                : 1.0000 (n=11)
+    - Bedroom Distribution     : 1.0000 (n=1)
+    - Bigger Room              : 1.0000 (n=1)
+    - Charging And Accessible Counts: 1.0000 (n=1)
+    - Client Name              : 1.0000 (n=1)
+    - Close Access             : 1.0000 (n=1)
+    - Closer Door              : 1.0000 (n=1)
+    - Closest To Bath          : 1.0000 (n=1)
+    - Closest To Staircase     : 0.5000 (n=2)
+    - Column Size Lookup       : 0.0000 (n=1)
+    - Consulting Firms         : 1.0000 (n=1)
+    - Count Abbreviations      : 0.0000 (n=1)
+    - Count Access Cores       : 0.0000 (n=2)
+    - Count Bedrooms           : 1.0000 (n=3)
+    - Count Consultants        : 1.0000 (n=3)
+    - Count Grid Columns       : 0.0000 (n=1)
+    - Count Lobby Levels       : 1.0000 (n=1)
+    - Count Radial Dividers    : 1.0000 (n=1)
+    - Count Radial Paths       : 0.0000 (n=1)
+    - Count Section Callouts   : 1.0000 (n=1)
+    - Count Toilet             : 1.0000 (n=1)
+    - Count Window             : 1.0000 (n=2)
+    - Count Windows            : 0.5000 (n=4)
+    - Crawlspace Location      : 0.0000 (n=1)
+    - Deck Area                : 0.0000 (n=1)
+    - Dinning Chairs           : 0.0000 (n=1)
+    - Directional Relationship : 1.0000 (n=1)
+    - Door Schedule Count      : 1.0000 (n=1)
+    - Drawing Number           : 1.0000 (n=1)
+    - Elevation Count          : 1.0000 (n=1)
+    - Elevator Shaft           : 0.0000 (n=1)
+    - Entry Location Front     : 1.0000 (n=1)
+    - External Radius          : 0.0000 (n=1)
+    - Fewer Windows            : 0.0000 (n=1)
+    - Floor Area Comparison    : 1.0000 (n=1)
+    - Footing Typology         : 0.0000 (n=1)
+    - Front Windows            : 1.0000 (n=1)
+    - Gable Roof Count         : 0.0000 (n=1)
+    - General Notes Location   : 1.0000 (n=1)
+    - Grid Zone Identification : 1.0000 (n=1)
+    - Identify Vertical Elements: 1.0000 (n=1)
+    - Internal Radius          : 0.0000 (n=1)
+    - Issued Date              : 1.0000 (n=2)
+    - Item Location            : 1.0000 (n=1)
+    - Kitchen Appliances       : 1.0000 (n=1)
+    - Kitchen Feature          : 1.0000 (n=1)
+    - Larger Area              : 1.0000 (n=1)
+    - Larger Porch             : 1.0000 (n=1)
+    - Larger Space             : 1.0000 (n=1)
+    - Largest Bedroom          : 1.0000 (n=1)
+    - Largest Bedrooms         : 0.8000 (n=5)
+    - Largest Footing Type     : 0.0000 (n=1)
+    - Largest Room             : 0.8000 (n=10)
+    - Largest Space            : 1.0000 (n=1)
+    - Largest Toilet           : 1.0000 (n=1)
+    - Left Elevation Windows   : 1.0000 (n=1)
+    - Legend Location          : 1.0000 (n=2)
+    - Living Area              : 0.0000 (n=1)
+    - Map Orientation          : 1.0000 (n=1)
+    - Mech Vs Floor Location   : 1.0000 (n=2)
+    - Mechanical Space Location: 1.0000 (n=1)
+    - More Bedrooms            : 1.0000 (n=1)
+    - More Core Access Quadrant: 1.0000 (n=2)
+    - More Internal Ramp Quadrant: 0.0000 (n=1)
+    - More Stairwell           : 1.0000 (n=1)
+    - More Window              : 1.0000 (n=1)
+    - More Windows             : 0.0000 (n=1)
+    - No Built In Closet       : 0.0000 (n=1)
+    - No Internal Ramp Quadrant: 0.0000 (n=1)
+    - Orientation              : 0.0000 (n=1)
+    - Parking Levels           : 1.0000 (n=1)
+    - Porch Floor              : 1.0000 (n=1)
+    - Project Name             : 1.0000 (n=1)
+    - Project Number           : 1.0000 (n=1)
+    - Read Area Text           : 1.0000 (n=9)
+    - Read Door Lable          : 1.0000 (n=1)
+    - Read Floor Area          : 1.0000 (n=1)
+    - Read Material Label      : 1.0000 (n=1)
+    - Read Project Name        : 1.0000 (n=1)
+    - Read Room Label          : 1.0000 (n=7)
+    - Read Safety Note         : 1.0000 (n=1)
+    - Read Slope               : 1.0000 (n=2)
+    - Read Titleblock Client   : 1.0000 (n=1)
+    - Rear Windows             : 1.0000 (n=1)
+    - Rendering Position       : 1.0000 (n=1)
+    - Restaurant Space         : 1.0000 (n=1)
+    - Right Elevation Windows  : 1.0000 (n=1)
+    - Right Side Road          : 1.0000 (n=1)
+    - Roof Insulation Type     : 1.0000 (n=1)
+    - Roof Pitch View          : 0.0000 (n=1)
+    - Roof Slope Consistency   : 1.0000 (n=1)
+    - Room Identification      : 1.0000 (n=1)
+    - Room Orientation         : 1.0000 (n=1)
+    - Scale First Floor        : 1.0000 (n=1)
+    - Scale Reading            : 1.0000 (n=5)
+    - Section Count            : 0.0000 (n=1)
+    - Section For Stairs       : 1.0000 (n=1)
+    - Section View Symmetry    : 0.0000 (n=1)
+    - Sheet Count              : 1.0000 (n=1)
+    - Sheet Number             : 1.0000 (n=8)
+    - Sheet Title              : 1.0000 (n=7)
+    - Slope Reading            : 1.0000 (n=1)
+    - Staircase Windows        : 1.0000 (n=1)
+    - Stairs Location          : 1.0000 (n=1)
+    - Standard Parking Count   : 1.0000 (n=1)
+    - Thick Footing Type       : 1.0000 (n=1)
+    - Titleblock Location      : 1.0000 (n=2)
+    - Top Elevation            : 1.0000 (n=1)
+    - Total Parking Spaces     : 1.0000 (n=1)
+    - University Name          : 1.0000 (n=1)
+    - Window Schedule Count    : 0.0000 (n=1)
+    - Window Shed Roof         : 0.0000 (n=1)
+
+  QA Type Breakdown:
+    - Comparative Reasoning    : 0.7955 (n=44)
+    - Instance Counting        : 0.6667 (n=42)
     - Text Extraction (OCR)    : 0.9231 (n=65)
     - Spatial Reasoning        : 0.8049 (n=41)
 

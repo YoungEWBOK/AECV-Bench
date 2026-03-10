@@ -46,6 +46,8 @@ OFFICIAL_MODEL_NAMES = {
     'openai_gpt_52': 'OpenAI GPT-5.2',
     'openai_gpt_53': 'OpenAI GPT-5.3',
     'openai_gpt_5_3': 'OpenAI GPT-5.3',
+    'openai_gpt_54': 'OpenAI GPT-5.4',
+    'openai_gpt_5_4': 'OpenAI GPT-5.4',
     'amazon_nova_2_lite_v1': 'Amazon Nova 2 Lite v1',
     'cohere_command_a_vision': 'Cohere Command A Vision',
     'nvidia_nemotron_nano_12b_v2_vl': 'Nvidia Nemotron Nano 12B',
@@ -73,9 +75,11 @@ QA_TYPE_NAMES = {
 MODEL_DISPLAY_ORDER = [
     'gemini 3.1',         # 1. gemini 3.1
     'gemini 3',           # 2. gemini 3
-    'openai gpt-5.3',     # 3a. openai 5.3
+    'openai gpt-5.4',     # 3a. openai 5.4
+    'openai gpt 5.4',
+    'openai gpt-5.3',     # 3b. openai 5.3
     'openai gpt 5.3',
-    'openai gpt-5.2',     # 3b. openai 5.2
+    'openai gpt-5.2',     # 3c. openai 5.2
     'openai gpt 5.2',
     'opus 4.6',           # 4. opus 4.6
     'opus 4.5',           # 5. opus 4.5
@@ -214,6 +218,7 @@ def create_comparison_visualizations(evaluations: List[Dict], output_dir: str):
     ALLOWED_MODELS_FOR_GRAPHS = {
         'gemini_31_pro',
         'claude_opus_46',
+        'openai_gpt_54',
         'openai_gpt_53',
         'qwen_35_plus',
         'glm_46v',

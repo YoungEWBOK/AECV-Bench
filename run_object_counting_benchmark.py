@@ -66,7 +66,7 @@ class ModelRegistry:
                 analyzer=analyze_floorplan,
                 provider="openrouter",
                 note="Anthropic Claude Sonnet 4.6, latest Sonnet model",
-                enabled=True
+                enabled=False
             ),
             ModelConfig(
                 name="Claude Opus 4.6",
@@ -74,7 +74,7 @@ class ModelRegistry:
                 analyzer=analyze_floorplan,
                 provider="openrouter",
                 note="Anthropic Claude Opus 4.6, most advanced Opus model",
-                enabled=True
+                enabled=False
             ),
             ModelConfig(
                 name="Gemini 3.1 Pro",
@@ -82,7 +82,7 @@ class ModelRegistry:
                 analyzer=analyze_floorplan,
                 provider="openrouter",
                 note="Gemini 3.1 Pro preview model",
-                enabled=True
+                enabled=False
             ),
             ModelConfig(
                 name="Qwen 3.5 Plus",
@@ -90,7 +90,7 @@ class ModelRegistry:
                 analyzer=analyze_floorplan,
                 provider="openrouter",
                 note="Qwen 3.5 Plus model from February 2025",
-                enabled=True
+                enabled=False
             ),
             ModelConfig(
                 name="Grok 4.1 Fast",
@@ -130,6 +130,14 @@ class ModelRegistry:
                 analyzer=analyze_floorplan,
                 provider="openrouter",
                 note="OpenAI GPT-5.3 Chat model",
+                enabled=False
+            ),
+            ModelConfig(
+                name="OpenAI GPT-5.4",
+                model_id="openai/gpt-5.4",
+                analyzer=analyze_floorplan,
+                provider="openrouter",
+                note="OpenAI GPT-5.4 model",
                 enabled=True
             ),
             ModelConfig(
@@ -206,7 +214,7 @@ class ModelRegistry:
                 analyzer=analyze_floorplan_prompt_based,
                 provider="openrouter",
                 note="Nvidia Llama Nemotron Embed VL 1B V2 vision-language model (free)",
-                enabled=True
+                enabled=False
             ),
 
             # =================================================================
