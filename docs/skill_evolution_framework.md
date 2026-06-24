@@ -10,18 +10,29 @@ This repo now has a lightweight skill-evolution loop for AEC drawing QA and obje
 
 ## Fixed Categories
 
-The eight fixed categories live in `src/skill_evolution/categories.py`:
+The eight fixed categories live in `src/skill_evolution/categories.py`. They
+are organized by intermediate representation, not by a broad end-to-end
+reasoning script. A concrete skill should have one primary category; if it spans
+multiple categories, split it into smaller composable skills.
 
-1. `visual_evidence_acquisition`
-2. `text_ocr_grounding`
-3. `symbol_geometry_grounding`
-4. `spatial_relation_reasoning`
-5. `counting_enumeration`
-6. `answer_synthesis`
-7. `verification_reflection`
-8. `skill_library_management`
+1. `view_control`: raw image/current view -> targeted evidence view.
+2. `text_annotation_grounding`: evidence view -> positioned text spans and normalized annotations.
+3. `graphic_symbol_grounding`: evidence view -> typed symbol instances.
+4. `region_boundary_grounding`: visual primitives/annotations -> rooms, regions, boundaries, and openings.
+5. `spatial_topology_modeling`: grounded entities/regions -> spatial relation graph.
+6. `quantitative_set_reasoning`: entities/annotations/relation graph -> counts, comparisons, and selected sets.
+7. `query_answer_binding`: question/evidence graph -> concise answer candidate.
+8. `evidence_verification`: answer/evidence trace -> verified or corrected answer.
 
-Concrete skills should be generated from fixed/regressed cases, not manually defined.
+Concrete skills should be generated from fixed/regressed cases, not manually
+defined. Legacy category names such as `text_ocr_grounding` and
+`counting_enumeration` are accepted as aliases for loading older libraries, but
+newly generated libraries should use the category IDs above.
+
+`Skill Library Management` is no longer a primary skill category. Merge, prune,
+accept/reject, replay validation, provenance, and failure-mode tracking are
+framework governance operations handled by the library, validator, and replay
+modules.
 
 ## Main Files
 

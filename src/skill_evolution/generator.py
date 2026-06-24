@@ -7,15 +7,14 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence
 from src.utils.openai_compatible import chat_completion_content
 
 from .categories import (
-    ANSWER_SYNTHESIS,
-    COUNTING_ENUMERATION,
-    SPATIAL_RELATION_REASONING,
-    SKILL_CATEGORIES,
-    SYMBOL_GEOMETRY_GROUNDING,
-    TEXT_OCR_GROUNDING,
-    VERIFICATION_REFLECTION,
-    VISUAL_EVIDENCE_ACQUISITION,
-    category_title,
+    EVIDENCE_VERIFICATION,
+    GRAPHIC_SYMBOL_GROUNDING,
+    QUANTITATIVE_SET_REASONING,
+    QUERY_ANSWER_BINDING,
+    REGION_BOUNDARY_GROUNDING,
+    SPATIAL_TOPOLOGY_MODELING,
+    TEXT_ANNOTATION_GROUNDING,
+    VIEW_CONTROL,
     format_category_reference,
 )
 from .cases import EvolutionCase
@@ -225,6 +224,8 @@ def build_generation_prompt(
 Important design rule:
 - Humans define only the fixed category ontology and schema.
 - Concrete skills must be inferred from success/failure contrast in benchmark traces.
+- Each concrete skill must have exactly one primary category. If a procedure spans multiple categories, split it into smaller skills.
+- Categories are orthogonal intermediate-representation transforms; do not create broad end-to-end "read then count then answer" skills.
 - Do not copy exact ground-truth answers, candidate answers, image ids, or QA ids into trigger/actions/validator text.
 - You may put motivating case ids only in source_cases.
 - Prefer general reusable procedures that can survive held-out replay.
@@ -293,142 +294,148 @@ def _extract_json_object(content: str) -> Dict[str, Any]:
 
 
 HEURISTIC_SKILL_BLUEPRINTS: Dict[str, Dict[str, Any]] = {
-    VISUAL_EVIDENCE_ACQUISITION: {
+    VIEW_CONTROL: {
         "level": "functional",
-        "trigger": "the question depends on small symbols, local labels, or visually dense drawing regions",
-        "preconditions": ["A drawing image is available and the answer depends on visible evidence."],
-        "observations": ["global layout first", "target room or symbol region", "nearby labels and boundaries"],
+        "trigger": "the evidence is small, blurry, rotated, visually dense, or spread across overview and local detail",
+        "preconditions": ["A drawing image is available and the next step needs a clearer evidence view."],
+        "observations": ["global layout", "candidate local region", "orientation cues", "nearby context"],
         "actions": [
-            "Form an overview of the full plan before focusing on the target region.",
-            "Identify the smallest region that can answer the question without losing context.",
-            "If evidence is ambiguous, re-inspect neighboring labels, symbols, and room boundaries before answering.",
+            "Start with a full-plan overview to locate the relevant zone.",
+            "Select the smallest local view that preserves enough surrounding context.",
+            "Mentally rotate or re-orient the view when labels or symbols are angled.",
+            "If local evidence is ambiguous, inspect adjacent context before passing the view onward.",
         ],
         "validator": [
-            "Reject an answer if no visible region supports it.",
-            "Reject an answer if a neighboring room or symbol could plausibly change the result.",
+            "The selected view must contain the target evidence and enough context to avoid adjacent-room confusion.",
+            "Do not infer text, symbols, or relations in this skill; only decide where and how to inspect.",
         ],
-        "failure_modes": ["over-focusing on one crop", "missing tiny symbols", "using a nearby label from the wrong room"],
+        "failure_modes": ["over-cropping away context", "missing tiny symbols", "wrong orientation"],
         "risk": "medium",
     },
-    TEXT_OCR_GROUNDING: {
+    TEXT_ANNOTATION_GROUNDING: {
         "level": "functional",
-        "trigger": "the question asks for room names, area text, labels, dimensions, or written annotations",
-        "preconditions": ["The required answer is written or implied by text in the drawing."],
-        "observations": ["target text", "unit markers", "room name", "adjacent labels that may be confused"],
+        "trigger": "the answer depends on room names, dimensions, legends, numbers, identifiers, or written labels",
+        "preconditions": ["A targeted evidence view contains readable or partially readable annotation text."],
+        "observations": ["target text span", "unit markers", "room names", "legend entries", "adjacent labels"],
         "actions": [
-            "Locate the exact text region tied to the question entity.",
-            "Read the label with its unit or abbreviation, preserving decimal values and room-name variants.",
-            "Compare nearby labels to avoid copying text from an adjacent room.",
+            "Locate the exact annotation span tied to the queried entity.",
+            "Read the text together with units, decimal points, abbreviations, and nearby qualifiers.",
+            "Normalize common room-name and unit variants without changing numeric values.",
+            "Keep the text linked to its visible position for downstream region or answer binding.",
         ],
         "validator": [
-            "The final answer must preserve the numeric value and unit when the question asks for a measurement.",
-            "If two nearby labels are similar, choose the one spatially inside the target room boundary.",
+            "Reject the read if another nearby label is spatially closer to the queried region.",
+            "Preserve numeric values, units, and sign/decimal punctuation exactly unless normalization is explicit.",
         ],
-        "failure_modes": ["digit transcription error", "wrong adjacent room label", "dropping measurement units"],
+        "failure_modes": ["digit transcription error", "wrong adjacent label", "dropping units", "legend-label mismatch"],
         "risk": "medium",
     },
-    SYMBOL_GEOMETRY_GROUNDING: {
+    GRAPHIC_SYMBOL_GROUNDING: {
         "level": "functional",
-        "trigger": "the question depends on doors, windows, walls, rooms, fixtures, boundaries, or floor-plan symbols",
-        "preconditions": ["The answer depends on interpreting floor-plan geometry or architectural symbols."],
-        "observations": ["symbol type", "room boundary", "wall openings", "fixture labels"],
+        "trigger": "the answer depends on identifying doors, windows, fixtures, stairs, furniture, or other graphic symbols",
+        "preconditions": ["A targeted evidence view contains candidate graphic symbols."],
+        "observations": ["symbol shape", "wall attachment", "opening arc/line", "fixture geometry", "legend cue"],
         "actions": [
-            "Identify the target symbol class and distinguish it from visually similar classes.",
-            "Use walls and room boundaries to decide which room owns each symbol.",
-            "Apply the benchmark's symbol rules before converting symbols into an answer.",
+            "Identify symbol candidates by visual form before applying task-specific counting or relation rules.",
+            "Separate visually similar classes such as doors, windows, sliding openings, fixtures, and furniture.",
+            "Record each symbol as a typed instance with its approximate location or owning boundary.",
+            "Leave room-region ownership and counting decisions to downstream boundary or set reasoning skills.",
         ],
         "validator": [
-            "Reject counts or relations that mix doors, sliding openings, and windows without applying the rules.",
-            "Check that each symbol is attached to the intended room or boundary.",
+            "Do not count or answer directly in this skill; output typed symbol candidates only.",
+            "Reject a symbol type if its attachment or shape better matches a different class.",
         ],
-        "failure_modes": ["door/window confusion", "fixture counted as room", "boundary ownership error"],
+        "failure_modes": ["door/window confusion", "fixture mistaken for text", "furniture counted as architectural symbol"],
         "risk": "medium",
     },
-    SPATIAL_RELATION_REASONING: {
+    REGION_BOUNDARY_GROUNDING: {
         "level": "functional",
-        "trigger": "the question asks which room is connected, adjacent, accessible, left/right, above/below, or spatially related",
-        "preconditions": ["The answer depends on a spatial relation between rooms, walls, doors, openings, or labeled regions."],
-        "observations": ["target room", "neighboring rooms", "doors/openings", "shared boundaries", "directional cues"],
+        "trigger": "the answer depends on walls, room outlines, openings, enclosed spaces, zones, or object ownership by room",
+        "preconditions": ["Visual primitives, symbols, or labels suggest room or region boundaries."],
+        "observations": ["walls", "room outlines", "openings", "enclosed regions", "labels inside regions"],
         "actions": [
-            "Locate the named anchor room or region first.",
-            "Trace the relevant boundary, door, or opening before naming the related room.",
-            "Separate direct access from visual proximity or adjacency without a passable opening.",
-            "Resolve direction words from the drawing orientation, not from text order in the prompt.",
+            "Trace walls and openings to recover candidate enclosed regions or floor zones.",
+            "Attach labels and symbols to regions only when they fall inside or on the relevant boundary.",
+            "Distinguish a true room/space boundary from furniture lines, dimension lines, and decorative graphics.",
+            "Output regions, boundaries, openings, and ownership links for downstream topology or counting.",
         ],
         "validator": [
-            "Reject a room name if no visible shared boundary or required opening supports the relation.",
-            "Reject answers that confuse adjacent rooms with directly connected rooms.",
+            "A region must be supported by visible boundary evidence or a clearly labeled zone.",
+            "Do not infer adjacency, counts, or final answers here; output boundary-grounded regions.",
         ],
-        "failure_modes": ["proximity mistaken for connection", "left/right flip", "using a neighboring label from the wrong side"],
+        "failure_modes": ["dimension line treated as wall", "open area treated as closed room", "wrong symbol ownership"],
         "risk": "medium",
     },
-    COUNTING_ENUMERATION: {
+    SPATIAL_TOPOLOGY_MODELING: {
         "level": "functional",
-        "trigger": "the question asks for an exact number of objects, rooms, windows, doors, bedrooms, toilets, or spaces",
-        "preconditions": ["The answer is a count and candidate objects can be enumerated from the drawing."],
-        "observations": ["candidate objects", "deduplication boundaries", "exclusion rules"],
+        "trigger": "the question asks about adjacency, containment, direct connection, direction, paths, or which region owns an object",
+        "preconditions": ["Grounded regions, symbols, labels, or boundaries are available."],
+        "observations": ["regions", "shared boundaries", "openings", "directional frame", "object ownership links"],
         "actions": [
-            "Enumerate candidates before deciding the final number.",
+            "Build the minimal relation graph needed by the query.",
+            "Separate visual adjacency from direct access through a door or opening.",
+            "Resolve left/right/above/below from the drawing orientation and spatial layout.",
+            "Represent containment and ownership explicitly before selecting a related room or object.",
+        ],
+        "validator": [
+            "Reject a relation if no shared boundary, containment cue, or required opening supports it.",
+            "Do not perform counting or final answer formatting inside this skill.",
+        ],
+        "failure_modes": ["proximity mistaken for connection", "left/right flip", "ownership assigned to neighboring region"],
+        "risk": "medium",
+    },
+    QUANTITATIVE_SET_REASONING: {
+        "level": "functional",
+        "trigger": "the question asks for counts, candidate enumeration, deduplication, grouping, or quantitative comparison",
+        "preconditions": ["Grounded symbols, regions, annotations, or relation graph nodes are available."],
+        "observations": ["candidate set", "exclusion rules", "duplicates", "groups", "numeric annotations"],
+        "actions": [
+            "Define the candidate set implied by the question before counting or comparing.",
             "Apply inclusion and exclusion rules to each candidate.",
-            "Remove duplicates caused by adjacent symbols or multi-leaf/grouped openings.",
-            "Only then produce the concise count.",
+            "Deduplicate grouped or multi-part objects without deleting distinct instances.",
+            "Compute the count, selected set, or comparison result from the retained candidates only.",
         ],
         "validator": [
-            "The final count must equal the number of retained candidates after exclusions.",
-            "Re-check tiny bathroom/toilet windows and adjacent grouped openings.",
+            "The final number or comparison must match the retained candidate set.",
+            "Re-check tiny symbols, grouped openings, repeated labels, and region-scoped exclusions.",
         ],
-        "failure_modes": ["missed small object", "double count", "wrong inclusion rule"],
+        "failure_modes": ["missed candidate", "double count", "wrong denominator", "comparing labels from different units"],
         "risk": "medium",
     },
-    ANSWER_SYNTHESIS: {
+    QUERY_ANSWER_BINDING: {
         "level": "atomic",
-        "trigger": "after evidence has been grounded and the answer must be returned concisely",
-        "preconditions": ["The supporting evidence has been identified."],
-        "observations": ["requested output type", "answer unit", "grounded entity"],
+        "trigger": "grounded evidence exists and the question must be mapped to a concise answer type and format",
+        "preconditions": ["A question and at least one grounded evidence artifact are available."],
+        "observations": ["question intent", "requested entity", "answer type", "required unit or format"],
         "actions": [
-            "Return the exact requested entity, number, or text span.",
-            "Keep the final answer short and avoid unsupported explanation.",
-            "Preserve units and qualifiers that are required by the question.",
+            "Identify whether the question asks for text, number, object class, room name, relation, or comparison.",
+            "Select the evidence artifact that directly answers that intent.",
+            "Return the minimal answer with required unit, qualifier, or normalized label.",
+            "Avoid adding reasoning or unsupported context to the final answer.",
         ],
-        "validator": ["The answer directly addresses the question and contains no extra unsupported claims."],
-        "failure_modes": ["over-explaining", "dropping units", "answering a related but different question"],
+        "validator": [
+            "The answer must directly satisfy the question type.",
+            "Reject answers that include extra claims not represented in the selected evidence artifact.",
+        ],
+        "failure_modes": ["answering a related question", "dropping units", "over-explaining", "using wrong evidence type"],
         "risk": "low",
     },
-    VERIFICATION_REFLECTION: {
+    EVIDENCE_VERIFICATION: {
         "level": "functional",
-        "trigger": "before finalizing any answer that depends on OCR, counting, symbol interpretation, or spatial relation",
-        "preconditions": ["A draft answer exists."],
-        "observations": ["draft answer", "supporting evidence", "common error modes"],
+        "trigger": "a draft answer exists and needs support checking before finalization",
+        "preconditions": ["A draft answer and its evidence trace are available."],
+        "observations": ["draft answer", "evidence trace", "nearby alternatives", "common error modes"],
         "actions": [
-            "Check whether the draft answer is supported by the same region used to infer it.",
-            "Actively look for one plausible alternative answer or overlooked object.",
-            "Revise only when the visual evidence contradicts the draft.",
+            "Check that every answer element is supported by the cited visual, text, symbol, region, relation, or set evidence.",
+            "Look for one plausible missed or confused alternative before finalizing.",
+            "Correct the draft only when evidence contradicts it or a required candidate was omitted.",
+            "If evidence is insufficient, prefer a conservative answer over unsupported specificity.",
         ],
         "validator": [
-            "Reject the draft if the evidence region supports a different room, label, symbol, or count.",
-            "Do not change the draft based on speculation without visible evidence.",
+            "Reject the draft if the evidence trace supports a different label, symbol, relation, or count.",
+            "Do not change a supported answer based on speculation without visible evidence.",
         ],
-        "failure_modes": ["self-reflection changes a correct answer", "confirmation bias", "unsupported correction"],
+        "failure_modes": ["confirmation bias", "unsupported correction", "reflection drift", "missed contradiction"],
         "risk": "medium",
     },
 }
-
-# These categories usually emerge as library-level controls rather than direct QA
-# prompt skills, so the dry-run generator does not emit them by default.
-HEURISTIC_SKILL_BLUEPRINTS.setdefault(
-    "skill_library_management",
-    {
-        "level": "strategic",
-        "trigger": "when merging or pruning skill candidates after replay validation",
-        "preconditions": ["Replay results and validation issues are available."],
-        "observations": ["net gain", "regressions", "validation errors", "source case coverage"],
-        "actions": [
-            "Accept only skills with positive replay utility and no hard validation errors.",
-            "Reject skills that copy case answers or mention case ids outside source_cases.",
-            "Merge duplicate triggers only when the combined validator remains precise.",
-        ],
-        "validator": ["Accepted skills must improve held-out replay without excessive regressions."],
-        "failure_modes": ["overfitting to discovery cases", "trigger too broad", "duplicate skill drift"],
-        "risk": "low",
-    },
-)

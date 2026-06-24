@@ -5,7 +5,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
-from .categories import COUNTING_ENUMERATION, SYMBOL_GEOMETRY_GROUNDING, VERIFICATION_REFLECTION, infer_categories
+from .categories import (
+    EVIDENCE_VERIFICATION,
+    GRAPHIC_SYMBOL_GROUNDING,
+    QUANTITATIVE_SET_REASONING,
+    REGION_BOUNDARY_GROUNDING,
+    infer_categories,
+)
 
 
 @dataclass
@@ -213,7 +219,12 @@ def build_object_counting_evolution_cases(
                 baseline_score=base_score,
                 candidate_score=cand_score,
                 outcome=outcome,
-                categories=[COUNTING_ENUMERATION, SYMBOL_GEOMETRY_GROUNDING, VERIFICATION_REFLECTION],
+                categories=[
+                    QUANTITATIVE_SET_REASONING,
+                    GRAPHIC_SYMBOL_GROUNDING,
+                    REGION_BOUNDARY_GROUNDING,
+                    EVIDENCE_VERIFICATION,
+                ],
                 source_files={"baseline": baseline_csv, "candidate": candidate_csv},
             )
         )

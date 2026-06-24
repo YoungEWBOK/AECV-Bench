@@ -13,8 +13,8 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 from .categories import (
     CATEGORY_BY_ID,
+    EVIDENCE_VERIFICATION,
     FIXED_CATEGORY_IDS,
-    VERIFICATION_REFLECTION,
     category_title,
     infer_categories,
     normalize_category,
@@ -162,7 +162,7 @@ class SkillContract:
         if trigger_words and question_words:
             score += min(2.0, len(trigger_words & question_words) * 0.35)
         score += max(-2.0, min(2.0, self.utility.net_gain * 0.25))
-        if self.category == VERIFICATION_REFLECTION:
+        if self.category == EVIDENCE_VERIFICATION:
             score += 0.4
         return score
 

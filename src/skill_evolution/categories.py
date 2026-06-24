@@ -1,21 +1,23 @@
-"""Fixed skill categories for AEC drawing QA self-evolution.
+"""Fixed, mostly orthogonal skill categories for AEC drawing QA self-evolution.
 
-The concrete skills are expected to be generated and validated from benchmark
-traces. This module only defines the fixed category ontology and lightweight
-routing hints used to attach cases and prompts to those categories.
+The ontology is organized by intermediate representation rather than by a
+mixed processing narrative. Each category owns one transformation boundary, so a
+concrete skill should have exactly one primary category. Larger procedures
+should be decomposed into multiple skills that compose through evidence views,
+grounded entities, relation graphs, sets, answers, and verification traces.
 """
 from dataclasses import dataclass
 from typing import Dict, List, Sequence, Tuple
 
 
-VISUAL_EVIDENCE_ACQUISITION = "visual_evidence_acquisition"
-TEXT_OCR_GROUNDING = "text_ocr_grounding"
-SYMBOL_GEOMETRY_GROUNDING = "symbol_geometry_grounding"
-SPATIAL_RELATION_REASONING = "spatial_relation_reasoning"
-COUNTING_ENUMERATION = "counting_enumeration"
-ANSWER_SYNTHESIS = "answer_synthesis"
-VERIFICATION_REFLECTION = "verification_reflection"
-SKILL_LIBRARY_MANAGEMENT = "skill_library_management"
+VIEW_CONTROL = "view_control"
+TEXT_ANNOTATION_GROUNDING = "text_annotation_grounding"
+GRAPHIC_SYMBOL_GROUNDING = "graphic_symbol_grounding"
+REGION_BOUNDARY_GROUNDING = "region_boundary_grounding"
+SPATIAL_TOPOLOGY_MODELING = "spatial_topology_modeling"
+QUANTITATIVE_SET_REASONING = "quantitative_set_reasoning"
+QUERY_ANSWER_BINDING = "query_answer_binding"
+EVIDENCE_VERIFICATION = "evidence_verification"
 
 
 @dataclass(frozen=True)
@@ -25,132 +27,184 @@ class SkillCategory:
     category_id: str
     title: str
     purpose: str
+    input_artifact: str
+    output_artifact: str
     default_triggers: Tuple[str, ...]
 
 
 SKILL_CATEGORIES: Tuple[SkillCategory, ...] = (
     SkillCategory(
-        VISUAL_EVIDENCE_ACQUISITION,
-        "Visual Evidence Acquisition",
-        "Acquire reliable visual evidence before answering: overview, zoom, crop, rotate, and inspect local regions.",
-        ("small text", "tiny symbol", "hard to see", "local region", "image unclear"),
+        VIEW_CONTROL,
+        "View Control",
+        "Choose how to inspect the drawing: overview, zoom, crop, rotate, and local high-resolution evidence views.",
+        "raw image or current view",
+        "targeted evidence view",
+        ("overview", "zoom", "crop", "rotate", "small text", "tiny symbol", "unclear"),
     ),
     SkillCategory(
-        TEXT_OCR_GROUNDING,
-        "Text / OCR Grounding",
-        "Read and normalize text, labels, dimensions, room names, legends, and area annotations from the drawing.",
-        ("text", "label", "area", "size", "dimension", "name", "ocr"),
+        TEXT_ANNOTATION_GROUNDING,
+        "Text Annotation Grounding",
+        "Read and normalize written annotations such as room names, dimensions, legends, identifiers, and labels.",
+        "targeted evidence view",
+        "positioned text spans and normalized annotations",
+        ("text", "label", "area", "size", "dimension", "name", "legend", "number"),
     ),
     SkillCategory(
-        SYMBOL_GEOMETRY_GROUNDING,
-        "Symbol / Geometry Grounding",
-        "Ground floor-plan symbols and geometry such as doors, windows, walls, rooms, fixtures, and boundaries.",
-        ("door", "window", "wall", "room", "symbol", "fixture", "boundary"),
+        GRAPHIC_SYMBOL_GROUNDING,
+        "Graphic Symbol Grounding",
+        "Identify typed graphical instances such as doors, windows, fixtures, stairs, furniture, and legend symbols.",
+        "targeted evidence view",
+        "typed symbol instances",
+        ("door", "window", "fixture", "toilet", "sink", "stair", "symbol", "furniture"),
     ),
     SkillCategory(
-        SPATIAL_RELATION_REASONING,
-        "Spatial Relation Reasoning",
-        "Reason over adjacency, containment, left/right, above/below, access, connection, and paths.",
-        ("adjacent", "connected", "between", "left", "right", "above", "below", "access"),
+        REGION_BOUNDARY_GROUNDING,
+        "Region Boundary Grounding",
+        "Recover spatial regions and boundaries such as walls, room outlines, openings, enclosed spaces, and floor zones.",
+        "visual primitives and grounded annotations",
+        "rooms, regions, boundaries, and openings",
+        ("room", "wall", "boundary", "space", "region", "enclosed", "opening", "floor"),
     ),
     SkillCategory(
-        COUNTING_ENUMERATION,
-        "Counting / Enumeration",
-        "Enumerate candidate objects, remove duplicates, apply counting rules, and produce exact counts.",
-        ("how many", "count", "number of", "doors", "windows", "bedrooms", "toilets"),
+        SPATIAL_TOPOLOGY_MODELING,
+        "Spatial Topology Modeling",
+        "Build relation graphs over grounded entities: adjacency, containment, connection, direction, paths, and ownership.",
+        "grounded entities and regions",
+        "spatial relation graph",
+        ("adjacent", "connected", "between", "left", "right", "above", "below", "inside", "access"),
     ),
     SkillCategory(
-        ANSWER_SYNTHESIS,
-        "Answer Synthesis",
-        "Convert grounded evidence into the required concise answer format without unsupported explanation.",
-        ("answer", "final", "format", "concise"),
+        QUANTITATIVE_SET_REASONING,
+        "Quantitative Set Reasoning",
+        "Define candidate sets, deduplicate, group, count by region, and compare quantities or measurements.",
+        "entities, annotations, and relation graph",
+        "counts, comparisons, and selected sets",
+        ("how many", "count", "number of", "enumerate", "largest", "smallest", "more", "less"),
     ),
     SkillCategory(
-        VERIFICATION_REFLECTION,
-        "Verification / Reflection",
-        "Check whether the proposed answer is supported by visible evidence and catch common failure modes.",
-        ("verify", "check", "reflect", "mistake", "contradiction"),
+        QUERY_ANSWER_BINDING,
+        "Query Answer Binding",
+        "Bind the natural-language question to the needed evidence, answer type, unit, and concise response format.",
+        "question and evidence graph",
+        "answer candidate with evidence requirements",
+        ("question", "answer", "format", "which", "what", "final", "unit"),
     ),
     SkillCategory(
-        SKILL_LIBRARY_MANAGEMENT,
-        "Skill Library Management",
-        "Maintain, validate, merge, prune, and replay skills as reusable benchmark assets.",
-        ("merge", "prune", "validate", "replay", "library", "utility"),
+        EVIDENCE_VERIFICATION,
+        "Evidence Verification",
+        "Check that the answer is supported by visible evidence and catch omissions, misreads, duplicates, and contradictions.",
+        "answer candidate and evidence trace",
+        "verified or corrected answer",
+        ("verify", "check", "reflect", "mistake", "contradiction", "missed", "duplicate"),
     ),
 )
 
 FIXED_CATEGORY_IDS: Tuple[str, ...] = tuple(category.category_id for category in SKILL_CATEGORIES)
 CATEGORY_BY_ID: Dict[str, SkillCategory] = {category.category_id: category for category in SKILL_CATEGORIES}
 
-_CATEGORY_ALIASES = {
-    category.category_id: category.category_id for category in SKILL_CATEGORIES
-}
+_CATEGORY_ALIASES = {category.category_id: category.category_id for category in SKILL_CATEGORIES}
 _CATEGORY_ALIASES.update(
     {
-        "visual": VISUAL_EVIDENCE_ACQUISITION,
-        "visual_evidence": VISUAL_EVIDENCE_ACQUISITION,
-        "ocr": TEXT_OCR_GROUNDING,
-        "text": TEXT_OCR_GROUNDING,
-        "text_ocr": TEXT_OCR_GROUNDING,
-        "symbol": SYMBOL_GEOMETRY_GROUNDING,
-        "geometry": SYMBOL_GEOMETRY_GROUNDING,
-        "spatial": SPATIAL_RELATION_REASONING,
-        "spatial_reasoning": SPATIAL_RELATION_REASONING,
-        "counting": COUNTING_ENUMERATION,
-        "enumeration": COUNTING_ENUMERATION,
-        "answer": ANSWER_SYNTHESIS,
-        "synthesis": ANSWER_SYNTHESIS,
-        "verification": VERIFICATION_REFLECTION,
-        "reflection": VERIFICATION_REFLECTION,
-        "management": SKILL_LIBRARY_MANAGEMENT,
-        "library_management": SKILL_LIBRARY_MANAGEMENT,
+        "view": VIEW_CONTROL,
+        "visual": VIEW_CONTROL,
+        "visual_evidence": VIEW_CONTROL,
+        "visual_evidence_acquisition": VIEW_CONTROL,
+        "evidence_acquisition": VIEW_CONTROL,
+        "ocr": TEXT_ANNOTATION_GROUNDING,
+        "text": TEXT_ANNOTATION_GROUNDING,
+        "text_ocr": TEXT_ANNOTATION_GROUNDING,
+        "text_ocr_grounding": TEXT_ANNOTATION_GROUNDING,
+        "annotation": TEXT_ANNOTATION_GROUNDING,
+        "text_grounding": TEXT_ANNOTATION_GROUNDING,
+        "symbol": GRAPHIC_SYMBOL_GROUNDING,
+        "graphic_symbol": GRAPHIC_SYMBOL_GROUNDING,
+        "geometry": GRAPHIC_SYMBOL_GROUNDING,
+        "symbol_geometry": GRAPHIC_SYMBOL_GROUNDING,
+        "symbol_geometry_grounding": GRAPHIC_SYMBOL_GROUNDING,
+        "boundary": REGION_BOUNDARY_GROUNDING,
+        "region": REGION_BOUNDARY_GROUNDING,
+        "room_boundary": REGION_BOUNDARY_GROUNDING,
+        "spatial": SPATIAL_TOPOLOGY_MODELING,
+        "spatial_reasoning": SPATIAL_TOPOLOGY_MODELING,
+        "spatial_relation": SPATIAL_TOPOLOGY_MODELING,
+        "spatial_relation_reasoning": SPATIAL_TOPOLOGY_MODELING,
+        "topology": SPATIAL_TOPOLOGY_MODELING,
+        "counting": QUANTITATIVE_SET_REASONING,
+        "enumeration": QUANTITATIVE_SET_REASONING,
+        "counting_enumeration": QUANTITATIVE_SET_REASONING,
+        "quantitative": QUANTITATIVE_SET_REASONING,
+        "set_reasoning": QUANTITATIVE_SET_REASONING,
+        "answer": QUERY_ANSWER_BINDING,
+        "synthesis": QUERY_ANSWER_BINDING,
+        "answer_synthesis": QUERY_ANSWER_BINDING,
+        "query": QUERY_ANSWER_BINDING,
+        "query_binding": QUERY_ANSWER_BINDING,
+        "verification": EVIDENCE_VERIFICATION,
+        "reflection": EVIDENCE_VERIFICATION,
+        "verification_reflection": EVIDENCE_VERIFICATION,
+        "evidence_check": EVIDENCE_VERIFICATION,
+        # Library management is intentionally not a skill category anymore. Map
+        # legacy libraries to evidence verification so old artifacts remain
+        # loadable without reintroducing a non-inference category.
+        "management": EVIDENCE_VERIFICATION,
+        "library_management": EVIDENCE_VERIFICATION,
+        "skill_library_management": EVIDENCE_VERIFICATION,
     }
 )
 
 QA_TYPE_CATEGORY_HINTS: Dict[str, Tuple[str, ...]] = {
-    "ocr_qa": (VISUAL_EVIDENCE_ACQUISITION, TEXT_OCR_GROUNDING, ANSWER_SYNTHESIS, VERIFICATION_REFLECTION),
+    "ocr_qa": (
+        VIEW_CONTROL,
+        TEXT_ANNOTATION_GROUNDING,
+        QUERY_ANSWER_BINDING,
+        EVIDENCE_VERIFICATION,
+    ),
     "spatial_qa": (
-        VISUAL_EVIDENCE_ACQUISITION,
-        SYMBOL_GEOMETRY_GROUNDING,
-        SPATIAL_RELATION_REASONING,
-        ANSWER_SYNTHESIS,
-        VERIFICATION_REFLECTION,
+        VIEW_CONTROL,
+        REGION_BOUNDARY_GROUNDING,
+        SPATIAL_TOPOLOGY_MODELING,
+        QUERY_ANSWER_BINDING,
+        EVIDENCE_VERIFICATION,
     ),
     "counting_qa": (
-        VISUAL_EVIDENCE_ACQUISITION,
-        SYMBOL_GEOMETRY_GROUNDING,
-        COUNTING_ENUMERATION,
-        ANSWER_SYNTHESIS,
-        VERIFICATION_REFLECTION,
+        VIEW_CONTROL,
+        GRAPHIC_SYMBOL_GROUNDING,
+        REGION_BOUNDARY_GROUNDING,
+        QUANTITATIVE_SET_REASONING,
+        EVIDENCE_VERIFICATION,
     ),
     "comparison_qa": (
-        VISUAL_EVIDENCE_ACQUISITION,
-        TEXT_OCR_GROUNDING,
-        SPATIAL_RELATION_REASONING,
-        ANSWER_SYNTHESIS,
-        VERIFICATION_REFLECTION,
+        VIEW_CONTROL,
+        TEXT_ANNOTATION_GROUNDING,
+        SPATIAL_TOPOLOGY_MODELING,
+        QUANTITATIVE_SET_REASONING,
+        QUERY_ANSWER_BINDING,
+        EVIDENCE_VERIFICATION,
     ),
     "object_counting": (
-        VISUAL_EVIDENCE_ACQUISITION,
-        SYMBOL_GEOMETRY_GROUNDING,
-        COUNTING_ENUMERATION,
-        VERIFICATION_REFLECTION,
+        VIEW_CONTROL,
+        GRAPHIC_SYMBOL_GROUNDING,
+        REGION_BOUNDARY_GROUNDING,
+        QUANTITATIVE_SET_REASONING,
+        EVIDENCE_VERIFICATION,
     ),
 }
 
 TASK_KEYWORD_HINTS: Tuple[Tuple[Tuple[str, ...], Tuple[str, ...]], ...] = (
-    (("read", "area", "text", "dimension", "label", "ocr"), (TEXT_OCR_GROUNDING, VISUAL_EVIDENCE_ACQUISITION)),
-    (("adjacency", "access", "connect", "left", "right", "nearest"), (SPATIAL_RELATION_REASONING, SYMBOL_GEOMETRY_GROUNDING)),
-    (("largest", "smallest", "compare", "more", "less"), (TEXT_OCR_GROUNDING, SPATIAL_RELATION_REASONING)),
-    (("count", "number", "enumerate"), (COUNTING_ENUMERATION, SYMBOL_GEOMETRY_GROUNDING)),
+    (("read", "area", "text", "dimension", "label", "ocr", "legend"), (TEXT_ANNOTATION_GROUNDING, VIEW_CONTROL)),
+    (("door", "window", "toilet", "fixture", "symbol", "stair"), (GRAPHIC_SYMBOL_GROUNDING, VIEW_CONTROL)),
+    (("wall", "room", "space", "boundary", "region", "enclosed"), (REGION_BOUNDARY_GROUNDING, VIEW_CONTROL)),
+    (("adjacency", "access", "connect", "left", "right", "nearest", "inside"), (SPATIAL_TOPOLOGY_MODELING, REGION_BOUNDARY_GROUNDING)),
+    (("largest", "smallest", "compare", "more", "less"), (QUANTITATIVE_SET_REASONING, TEXT_ANNOTATION_GROUNDING)),
+    (("count", "number", "enumerate"), (QUANTITATIVE_SET_REASONING, GRAPHIC_SYMBOL_GROUNDING, REGION_BOUNDARY_GROUNDING)),
 )
 
 QUESTION_KEYWORD_HINTS: Tuple[Tuple[Tuple[str, ...], Tuple[str, ...]], ...] = (
-    (("how many", "number of", "count"), (COUNTING_ENUMERATION, SYMBOL_GEOMETRY_GROUNDING)),
-    (("area", "size", "m2", "square", "label", "text"), (TEXT_OCR_GROUNDING,)),
-    (("which room", "connected", "adjacent", "directly", "left", "right", "above", "below"), (SPATIAL_RELATION_REASONING,)),
-    (("door", "window", "wall", "toilet", "bedroom", "space"), (SYMBOL_GEOMETRY_GROUNDING,)),
-    (("largest", "smallest", "bigger", "smaller", "more", "less"), (TEXT_OCR_GROUNDING, SPATIAL_RELATION_REASONING)),
+    (("how many", "number of", "count"), (QUANTITATIVE_SET_REASONING, GRAPHIC_SYMBOL_GROUNDING)),
+    (("area", "size", "m2", "square", "label", "text", "dimension"), (TEXT_ANNOTATION_GROUNDING,)),
+    (("which room", "connected", "adjacent", "directly", "left", "right", "above", "below", "inside"), (SPATIAL_TOPOLOGY_MODELING, REGION_BOUNDARY_GROUNDING)),
+    (("door", "window", "wall", "toilet", "bedroom", "space", "room"), (GRAPHIC_SYMBOL_GROUNDING, REGION_BOUNDARY_GROUNDING)),
+    (("largest", "smallest", "bigger", "smaller", "more", "less"), (QUANTITATIVE_SET_REASONING, TEXT_ANNOTATION_GROUNDING)),
 )
 
 
@@ -189,8 +243,8 @@ def infer_categories(
 ) -> List[str]:
     """Infer likely skill categories for a benchmark row or prompt.
 
-    This is intentionally conservative. It routes examples and skills but does
-    not define the concrete skills themselves.
+    The result is a compact routing hint, not a claim that all listed skills
+    should be merged. Concrete skills should still have one primary category.
     """
     inferred: List[str] = []
     qa_type_key = (qa_type or "").strip().lower()
@@ -206,10 +260,10 @@ def infer_categories(
             _add_unique(inferred, categories)
 
     if not inferred:
-        _add_unique(inferred, (VISUAL_EVIDENCE_ACQUISITION,))
+        _add_unique(inferred, (VIEW_CONTROL,))
 
     if include_answer_and_verification:
-        _add_unique(inferred, (ANSWER_SYNTHESIS, VERIFICATION_REFLECTION))
+        _add_unique(inferred, (QUERY_ANSWER_BINDING, EVIDENCE_VERIFICATION))
 
     return inferred[:max_categories]
 
@@ -218,5 +272,16 @@ def format_category_reference() -> str:
     """Return a compact category reference for generator prompts and reports."""
     lines = []
     for category in SKILL_CATEGORIES:
-        lines.append("- {} ({}): {}".format(category.category_id, category.title, category.purpose))
+        lines.append(
+            "- {} ({}): {} Input: {}. Output: {}.".format(
+                category.category_id,
+                category.title,
+                category.purpose,
+                category.input_artifact,
+                category.output_artifact,
+            )
+        )
+    lines.append(
+        "\nGovernance note: skill-library merge, pruning, validation, replay, and failure-mode logging are framework governance operations, not primary inference skill categories."
+    )
     return "\n".join(lines)
