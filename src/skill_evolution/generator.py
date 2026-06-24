@@ -39,6 +39,8 @@ class SkillEvolutionGenerator:
         timeout: int = 90,
         max_retries: int = 3,
         extra_body: Optional[Dict[str, Any]] = None,
+        stream: bool = False,
+        stream_options: Optional[Dict[str, Any]] = None,
     ):
         self.generator_model = generator_model
         self.api_key = api_key
@@ -47,6 +49,8 @@ class SkillEvolutionGenerator:
         self.timeout = timeout
         self.max_retries = max_retries
         self.extra_body = extra_body
+        self.stream = stream
+        self.stream_options = stream_options
         self.validator = SkillContractValidator()
 
     def generate(
@@ -93,6 +97,8 @@ class SkillEvolutionGenerator:
             temperature=self.temperature,
             response_format={"type": "json_object"},
             extra_body=self.extra_body,
+            stream=self.stream,
+            stream_options=self.stream_options,
             timeout=self.timeout,
             max_retries=self.max_retries,
             request_label="Skill evolution candidate generation",

@@ -636,6 +636,8 @@ def main():
     args.output_dir = args.output_dir or judge_config.get("output_dir", "results/qa_llm_judge_results")
     args.judge_model = args.judge_model or judge_config.get("model_id", "openai/gpt-4o")
     judge_extra_body = judge_config.get("extra_body")
+    judge_stream = bool(judge_config.get("stream", False))
+    judge_stream_options = judge_config.get("stream_options")
     if not args.csv_files and judge_config.get("csv_files"):
         args.csv_files = judge_config["csv_files"]
     force = args.force or bool(judge_config.get("force", False))
@@ -721,6 +723,8 @@ def main():
             judge_model=args.judge_model,
             open_router_api_key=LLM_API_KEY,
             extra_body=judge_extra_body,
+            stream=judge_stream,
+            stream_options=judge_stream_options,
         )
         
         # Evaluate each new model
@@ -760,6 +764,8 @@ def main():
             judge_model=args.judge_model,
             open_router_api_key=LLM_API_KEY,
             extra_body=judge_extra_body,
+            stream=judge_stream,
+            stream_options=judge_stream_options,
         )
         
         # Evaluate each model

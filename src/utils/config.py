@@ -8,6 +8,7 @@ from pathlib import Path
 LLM_API_KEY_ENV_NAMES = (
     "XMAPI_API_KEY",
     "OPENAI_API_KEY",
+    "DASHSCOPE_API_KEY",
     "API_KEY",
     "api_key",
     "LLM_API_KEY",
@@ -111,7 +112,7 @@ def require_llm_api_key() -> str:
     if not key:
         raise ValueError(
             "LLM API key is required. "
-            "Set XMAPI_API_KEY, OPENAI_API_KEY, or API_KEY as an environment variable or in .env."
+            "Set XMAPI_API_KEY, OPENAI_API_KEY, DASHSCOPE_API_KEY, or API_KEY as an environment variable or in .env."
         )
     return key
 

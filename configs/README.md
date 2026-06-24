@@ -28,7 +28,23 @@ set OPENAI_API_KEY=sk-your-api-key
 set LLM_API_MODE=chat_completions
 ```
 
-Qwen thinking-mode controls are passed through `extra_body`. The Qwen3.7 Plus presets set `{"enable_thinking": false}` for both benchmark calls and judge calls by default. For another DashScope model, add the same field under the relevant `qa`, `object_counting`, or `judge` config section.
+`DASHSCOPE_API_KEY` is also accepted directly if you prefer the Aliyun examples:
+
+```powershell
+set DASHSCOPE_API_KEY=sk-your-api-key
+set OPENAI_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+set LLM_API_MODE=chat_completions
+```
+
+For DashScope workspace models such as `deepseek-v4-pro`, set the workspace base URL:
+
+```powershell
+set OPENAI_BASE_URL=https://<WorkspaceId>.cn-beijing.maas.aliyuncs.com/compatible-mode/v1
+set DASHSCOPE_API_KEY=sk-your-api-key
+set LLM_API_MODE=chat_completions
+```
+
+Thinking-mode controls are passed through `extra_body`. The Qwen3.7 Plus presets set `{"enable_thinking": false}` by default. The DeepSeek V4 Pro and Kimi K2.6 presets set `{"enable_thinking": true}` to match the provider examples; change it to `false` in the config if you want non-thinking runs. DeepSeek presets also set `stream: true` and `stream_options.include_usage: true`.
 
 ## Presets
 
@@ -43,6 +59,12 @@ Qwen thinking-mode controls are passed through `extra_body`. The Qwen3.7 Plus pr
 | `self_evolution_qwen37_plus.json` | Independent Qwen3.7 Plus supervised skill self-evolution from labels and predictions. |
 | `qa_qwen37_plus_exploration.json` | Optional QA-only Qwen3.7 Plus step-by-step and self-refine traces for prompt ablation diagnostics. |
 | `qa_qwen37_plus_self_evolution.json` | QA-only Qwen3.7 Plus skill-guided/self-evolution run. |
+| `qa_deepseek_v4_pro_baseline.json` | QA-only DeepSeek V4 Pro one-shot baseline. |
+| `self_evolution_deepseek_v4_pro.json` | Independent DeepSeek V4 Pro supervised skill self-evolution from labels and predictions. |
+| `qa_deepseek_v4_pro_self_evolution.json` | QA-only DeepSeek V4 Pro skill-guided/self-evolution run. |
+| `qa_kimi_k26_baseline.json` | QA-only Kimi K2.6 one-shot baseline. |
+| `self_evolution_kimi_k26.json` | Independent Kimi K2.6 supervised skill self-evolution from labels and predictions. |
+| `qa_kimi_k26_self_evolution.json` | QA-only Kimi K2.6 skill-guided/self-evolution run. |
 | `skill_evolution_qwen37_plus.json` | Legacy/optional contrastive skill-mining config using Qwen judge CSVs. |
 | `qa_prompt_matrix_mini.json` | QA-only mini matrix: `one_shot`, `step_by_step`, `self_refine`. |
 | `qa_prompt_matrix_with_reflection.json` | QA-only matrix including `two_pass_reflection`. |
@@ -122,4 +144,26 @@ conda run -n exe python run_qa_llm_judge_evaluation.py --config configs\qa_qwen3
 conda run -n exe python run_qa_benchmark.py --config configs\qa_qwen37_plus_self_evolution.json
 conda run -n exe python run_qa_llm_judge_evaluation.py --config configs\qa_qwen37_plus_self_evolution.json
 conda run -n exe python generate_strategy_analysis_report.py --qa-eval-dir results\qa_llm_judge_results_qwen37_plus_compare --object-dir results\object_counting_unused_for_qwen37_plus --output-dir results\strategy_analysis_qwen37_plus
+```
+
+Run the same independent self-evolution comparison for DeepSeek V4 Pro:
+
+```powershell
+conda run -n exe python run_self_evolution.py --config configs\self_evolution_deepseek_v4_pro.json --dry-run
+conda run -n exe python run_qa_benchmark.py --config configs\qa_deepseek_v4_pro_baseline.json
+conda run -n exe python run_qa_llm_judge_evaluation.py --config configs\qa_deepseek_v4_pro_baseline.json
+conda run -n exe python run_qa_benchmark.py --config configs\qa_deepseek_v4_pro_self_evolution.json
+conda run -n exe python run_qa_llm_judge_evaluation.py --config configs\qa_deepseek_v4_pro_self_evolution.json
+conda run -n exe python generate_strategy_analysis_report.py --qa-eval-dir results\qa_llm_judge_results_deepseek_v4_pro_compare --object-dir results\object_counting_unused_for_deepseek_v4_pro --output-dir results\strategy_analysis_deepseek_v4_pro
+```
+
+Run the same independent self-evolution comparison for Kimi K2.6:
+
+```powershell
+conda run -n exe python run_self_evolution.py --config configs\self_evolution_kimi_k26.json --dry-run
+conda run -n exe python run_qa_benchmark.py --config configs\qa_kimi_k26_baseline.json
+conda run -n exe python run_qa_llm_judge_evaluation.py --config configs\qa_kimi_k26_baseline.json
+conda run -n exe python run_qa_benchmark.py --config configs\qa_kimi_k26_self_evolution.json
+conda run -n exe python run_qa_llm_judge_evaluation.py --config configs\qa_kimi_k26_self_evolution.json
+conda run -n exe python generate_strategy_analysis_report.py --qa-eval-dir results\qa_llm_judge_results_kimi_k26_compare --object-dir results\object_counting_unused_for_kimi_k26 --output-dir results\strategy_analysis_kimi_k26
 ```

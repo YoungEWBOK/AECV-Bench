@@ -1,0 +1,51 @@
+{
+  "_comment": "QA skill-guided experiment for DeepSeek V4 Pro. Run run_self_evolution.py first if results/self_evolution_deepseek_v4_pro/accepted_skill_library.json does not exist.",
+  "qa": {
+    "images_dir": "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/images",
+    "labels_dir": "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/labels",
+    "output_dir": "benchmark_result_qa",
+    "skill_library_path": "results/self_evolution_deepseek_v4_pro/accepted_skill_library.json",
+    "extra_body": {
+      "enable_thinking": true
+    },
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    },
+    "max_skills_per_question": 4,
+    "skill_statuses": [
+      "candidate",
+      "accepted"
+    ],
+    "models": [
+      {
+        "name": "DeepSeek V4 Pro",
+        "model_id": "deepseek-v4-pro",
+        "enabled": true,
+        "prompt_strategy": "skill_guided",
+        "skill_library_path": "results/self_evolution_deepseek_v4_pro/accepted_skill_library.json",
+        "max_skills_per_question": 4,
+        "skill_statuses": [
+          "candidate",
+          "accepted"
+        ]
+      }
+    ]
+  },
+  "judge": {
+    "_comment": "Uses the same model as judge by default for isolated provider experiments.",
+    "model_id": "deepseek-v4-pro",
+    "extra_body": {
+      "enable_thinking": true
+    },
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    },
+    "input_dir": "benchmark_result_qa",
+    "output_dir": "results/qa_llm_judge_results_deepseek_v4_pro_compare",
+    "csv_files": [
+      "benchmark_result_qa/qa_results_deepseek_v4_pro_skill_guided.csv"
+    ]
+  }
+}
