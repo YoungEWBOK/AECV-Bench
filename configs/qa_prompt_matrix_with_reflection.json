@@ -1,4 +1,4 @@
-﻿{
+{
   "_comment": "QA prompt-strategy matrix including two-pass reflection. This costs about 2x for that strategy.",
   "object_counting": {
     "benchmark_dir": "data/Use Case 1 - Object Counting/1 - Full Datasets",

@@ -1,4 +1,4 @@
-﻿{
+{
   "_comment": "QA baseline experiment for Kimi K2.6 on DashScope OpenAI-compatible mode. Set OPENAI_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1, OPENAI_API_KEY, and LLM_API_MODE=chat_completions.",
   "qa": {
     "images_dir": "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/images",

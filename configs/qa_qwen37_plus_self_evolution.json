@@ -1,4 +1,4 @@
-﻿{
+{
   "_comment": "QA self-evolution / skill-guided experiment for Qwen3.7 Plus. Run run_self_evolution.py first if results/self_evolution_qwen37_plus/accepted_skill_library.json does not exist.",
   "qa": {
     "images_dir": "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/images",

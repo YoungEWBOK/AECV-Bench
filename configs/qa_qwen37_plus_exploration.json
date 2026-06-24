@@ -1,4 +1,4 @@
-﻿{
+{
   "_comment": "QA exploratory strategies for Qwen3.7 Plus. These outputs are used as candidate traces for skill evolution.",
   "qa": {
     "images_dir": "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/images",

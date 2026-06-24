@@ -1,4 +1,4 @@
-﻿{
+{
   "_comment": "Small object-counting prompt-strategy matrix without two-pass reflection.",
   "object_counting": {
     "benchmark_dir": "data/Use Case 1 - Object Counting/1 - Full Datasets",

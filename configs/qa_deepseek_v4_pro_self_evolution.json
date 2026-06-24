@@ -1,4 +1,4 @@
-﻿{
+{
   "_comment": "QA self-evolution / skill-guided experiment for DeepSeek V4 Pro. Run run_self_evolution.py first if results/self_evolution_deepseek_v4_pro/accepted_skill_library.json does not exist.",
   "qa": {
     "images_dir": "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/images",

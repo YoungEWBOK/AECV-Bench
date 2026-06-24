@@ -1,4 +1,4 @@
-﻿{
+{
   "_comment": "Independent supervised skill self-evolution for DeepSeek V4 Pro. This does not require baseline or exploration CSVs; it uses labels plus model predictions as feedback.",
   "self_evolution": {
     "output_dir": "results/self_evolution_deepseek_v4_pro",

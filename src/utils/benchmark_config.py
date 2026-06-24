@@ -15,7 +15,7 @@ def load_benchmark_config(config_path: str = DEFAULT_CONFIG_PATH) -> Dict[str, A
     if not path.is_file():
         raise FileNotFoundError(f"Benchmark config file not found: {path}")
 
-    with path.open("r", encoding="utf-8") as f:
+    with path.open("r", encoding="utf-8-sig") as f:
         config = json.load(f)
 
     if not isinstance(config, dict):

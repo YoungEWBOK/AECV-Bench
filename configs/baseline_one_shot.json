@@ -1,4 +1,4 @@
-﻿{
+{
   "_comment": "Baseline one-shot config. Set XMAPI_API_KEY/XMAPI_BASE_URL or OPENAI_API_KEY/OPENAI_BASE_URL in .env.",
   "object_counting": {
     "benchmark_dir": "data/Use Case 1 - Object Counting/1 - Full Datasets",

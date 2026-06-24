@@ -1,4 +1,4 @@
-﻿{
+{
   "_comment": "Skill-evolution config for GPT-5.4. It treats one-shot as baseline and exploratory GPT-5.4 strategies as candidate traces.",
   "skill_evolution": {
     "output_dir": "results/skill_evolution_gpt54",

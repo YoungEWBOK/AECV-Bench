@@ -1,4 +1,4 @@
-﻿{
+{
   "_comment": "QA self-evolution / skill-guided experiment for GPT-5.4. Run skill evolution first if results/skill_evolution/candidate_skill_library.json does not exist.",
   "qa": {
     "images_dir": "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/images",

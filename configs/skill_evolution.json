@@ -1,4 +1,4 @@
-﻿{
+{
   "_comment": "Skill-evolution config. This file does not call APIs unless you run generate/evolve without --dry-run and set generator_model.",
   "skill_evolution": {
     "output_dir": "results/skill_evolution",

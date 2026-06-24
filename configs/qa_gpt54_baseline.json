@@ -1,4 +1,4 @@
-﻿{
+{
   "_comment": "QA baseline experiment for GPT-5.4. Set XMAPI_API_KEY/XMAPI_BASE_URL for the streamed Responses gateway, or OPENAI_API_KEY/OPENAI_BASE_URL plus LLM_API_MODE=responses if needed.",
   "qa": {
     "images_dir": "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/images",
