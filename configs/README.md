@@ -27,6 +27,8 @@ Models are normally selected in each config file via `model_id`. If you want to 
 | `baseline_one_shot.json` | Full one-shot baseline for QA and object counting. |
 | `qa_gpt54_baseline.json` | QA-only GPT-5.4 one-shot baseline. |
 | `qa_gpt54_self_evolution.json` | QA-only GPT-5.4 skill-guided/self-evolution run. |
+| `qa_gpt54_exploration.json` | QA-only GPT-5.4 step-by-step and self-refine traces for skill evolution. |
+| `skill_evolution_gpt54.json` | GPT-5.4-specific skill-evolution config using GPT-5.4 judge CSVs. |
 | `qa_prompt_matrix_mini.json` | QA-only mini matrix: `one_shot`, `step_by_step`, `self_refine`. |
 | `qa_prompt_matrix_with_reflection.json` | QA-only matrix including `two_pass_reflection`. |
 | `object_counting_prompt_matrix_mini.json` | Object-counting mini matrix: `one_shot`, `step_by_step`, `self_refine`, 20 folders. |
@@ -85,4 +87,13 @@ conda run -n exe python run_qa_benchmark.py --config configs\qa_gpt54_self_evolu
 conda run -n exe python run_qa_llm_judge_evaluation.py --config configs\qa_gpt54_baseline.json
 conda run -n exe python run_qa_llm_judge_evaluation.py --config configs\qa_gpt54_self_evolution.json
 conda run -n exe python generate_strategy_analysis_report.py --qa-eval-dir results\qa_llm_judge_results_gpt54_compare --object-dir results\object_counting_unused_for_gpt54 --output-dir results\strategy_analysis_gpt54
+```
+
+Build a GPT-5.4 self-evolution skill library from GPT-5.4 traces:
+
+```powershell
+conda run -n exe python run_qa_benchmark.py --config configs\qa_gpt54_exploration.json
+conda run -n exe python run_qa_llm_judge_evaluation.py --config configs\qa_gpt54_exploration.json
+conda run -n exe python run_skill_evolution.py --config configs\skill_evolution_gpt54.json evolve --dry-run
+conda run -n exe python run_qa_benchmark.py --config configs\qa_gpt54_self_evolution.json
 ```
