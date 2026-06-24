@@ -25,6 +25,8 @@ Models are normally selected in each config file via `model_id`. If you want to 
 | File | Use |
 | --- | --- |
 | `baseline_one_shot.json` | Full one-shot baseline for QA and object counting. |
+| `qa_gpt54_baseline.json` | QA-only GPT-5.4 one-shot baseline. |
+| `qa_gpt54_self_evolution.json` | QA-only GPT-5.4 skill-guided/self-evolution run. |
 | `qa_prompt_matrix_mini.json` | QA-only mini matrix: `one_shot`, `step_by_step`, `self_refine`. |
 | `qa_prompt_matrix_with_reflection.json` | QA-only matrix including `two_pass_reflection`. |
 | `object_counting_prompt_matrix_mini.json` | Object-counting mini matrix: `one_shot`, `step_by_step`, `self_refine`, 20 folders. |
@@ -73,4 +75,14 @@ Generate candidate skills with your OpenAI-compatible endpoint:
 
 ```powershell
 conda run -n exe python run_skill_evolution.py --config configs\skill_evolution.json generate --model gpt-5.5
+```
+
+Compare GPT-5.4 one-shot baseline against skill-guided/self-evolution QA:
+
+```powershell
+conda run -n exe python run_qa_benchmark.py --config configs\qa_gpt54_baseline.json
+conda run -n exe python run_qa_benchmark.py --config configs\qa_gpt54_self_evolution.json
+conda run -n exe python run_qa_llm_judge_evaluation.py --config configs\qa_gpt54_baseline.json
+conda run -n exe python run_qa_llm_judge_evaluation.py --config configs\qa_gpt54_self_evolution.json
+conda run -n exe python generate_strategy_analysis_report.py --qa-eval-dir results\qa_llm_judge_results_gpt54_compare --object-dir results\object_counting_unused_for_gpt54 --output-dir results\strategy_analysis_gpt54
 ```
