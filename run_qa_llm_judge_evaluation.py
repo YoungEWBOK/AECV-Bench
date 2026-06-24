@@ -61,6 +61,8 @@ OFFICIAL_MODEL_NAMES = {
     'claude_sonnet_4_6': 'Claude Sonnet 4.6',
     'qwen_35_plus': 'Qwen 3.5 Plus',
     'qwen_3_5_plus': 'Qwen 3.5 Plus',
+    'qwen37_plus': 'Qwen3.7 Plus',
+    'qwen_37_plus': 'Qwen3.7 Plus',
     'claude_opus_46': 'Claude Opus 4.6',
     'claude_opus_4_6': 'Claude Opus 4.6',
 }
@@ -126,6 +128,8 @@ MODEL_DISPLAY_ORDER = [
     'grok',               # 9. grok
     'qwen 3.5 plus',      # 10. qwen 3.5 plus
     'qwen3.5',
+    'qwen3.7 plus',
+    'qwen37 plus',
     'qwen3 vl 8b instruct',  # 11. qwen 8b instruct (VLM)
     'qwen3-vl 8b',
     'glm-4.6v',           # 12. glm_46v (VLM)
@@ -267,6 +271,8 @@ def create_comparison_visualizations(evaluations: List[Dict], output_dir: str):
         'openai_gpt_54',
         'openai_gpt_53',
         'qwen_35_plus',
+        'qwen37_plus',
+        'qwen_37_plus',
         'glm_46v',
         'grok_41_fast',
         'nvidia_nemotron_nano_12b_v2_vl',

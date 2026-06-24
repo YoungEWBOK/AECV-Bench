@@ -1,0 +1,25 @@
+{
+  "_comment": "QA baseline experiment for Qwen3.7 Plus on DashScope OpenAI-compatible mode. Set OPENAI_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1, OPENAI_API_KEY, and LLM_API_MODE=chat_completions.",
+  "qa": {
+    "images_dir": "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/images",
+    "labels_dir": "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/labels",
+    "output_dir": "benchmark_result_qa",
+    "models": [
+      {
+        "name": "Qwen3.7 Plus",
+        "model_id": "qwen3.7-plus",
+        "enabled": true,
+        "prompt_strategy": "one_shot"
+      }
+    ]
+  },
+  "judge": {
+    "_comment": "Change model_id if your endpoint uses a different judge model.",
+    "model_id": "qwen3.7-plus",
+    "input_dir": "benchmark_result_qa",
+    "output_dir": "results/qa_llm_judge_results_qwen37_plus_compare",
+    "csv_files": [
+      "benchmark_result_qa/qa_results_qwen37_plus.csv"
+    ]
+  }
+}

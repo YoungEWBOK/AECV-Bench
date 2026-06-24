@@ -26,6 +26,8 @@ MODEL_NAMES = {
     "openai_gpt_53": "OpenAI GPT-5.3",
     "openai_gpt_52": "OpenAI GPT-5.2",
     "qwen_35_plus": "Qwen 3.5 Plus",
+    "qwen37_plus": "Qwen3.7 Plus",
+    "qwen_37_plus": "Qwen3.7 Plus",
     "glm_46v": "GLM-4.6V",
 }
 

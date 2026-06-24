@@ -1,0 +1,32 @@
+{
+  "_comment": "QA exploratory strategies for Qwen3.7 Plus. These outputs are used as candidate traces for skill evolution.",
+  "qa": {
+    "images_dir": "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/images",
+    "labels_dir": "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/labels",
+    "output_dir": "benchmark_result_qa",
+    "models": [
+      {
+        "name": "Qwen3.7 Plus",
+        "model_id": "qwen3.7-plus",
+        "enabled": true,
+        "prompt_strategy": "step_by_step"
+      },
+      {
+        "name": "Qwen3.7 Plus",
+        "model_id": "qwen3.7-plus",
+        "enabled": true,
+        "prompt_strategy": "self_refine"
+      }
+    ]
+  },
+  "judge": {
+    "_comment": "Use the same judge output directory as the Qwen3.7 Plus skill-evolution config.",
+    "model_id": "qwen3.7-plus",
+    "input_dir": "benchmark_result_qa",
+    "output_dir": "results/qa_llm_judge_results_qwen37_plus_compare",
+    "csv_files": [
+      "benchmark_result_qa/qa_results_qwen37_plus_step_by_step.csv",
+      "benchmark_result_qa/qa_results_qwen37_plus_self_refine.csv"
+    ]
+  }
+}

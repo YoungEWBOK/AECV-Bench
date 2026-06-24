@@ -1,0 +1,37 @@
+{
+  "_comment": "QA self-evolution / skill-guided experiment for Qwen3.7 Plus. Run skill evolution first if results/skill_evolution_qwen37_plus/candidate_skill_library.json does not exist.",
+  "qa": {
+    "images_dir": "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/images",
+    "labels_dir": "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/labels",
+    "output_dir": "benchmark_result_qa",
+    "skill_library_path": "results/skill_evolution_qwen37_plus/candidate_skill_library.json",
+    "max_skills_per_question": 4,
+    "skill_statuses": [
+      "candidate",
+      "accepted"
+    ],
+    "models": [
+      {
+        "name": "Qwen3.7 Plus",
+        "model_id": "qwen3.7-plus",
+        "enabled": true,
+        "prompt_strategy": "skill_guided",
+        "skill_library_path": "results/skill_evolution_qwen37_plus/candidate_skill_library.json",
+        "max_skills_per_question": 4,
+        "skill_statuses": [
+          "candidate",
+          "accepted"
+        ]
+      }
+    ]
+  },
+  "judge": {
+    "_comment": "Change model_id if your endpoint uses a different judge model.",
+    "model_id": "qwen3.7-plus",
+    "input_dir": "benchmark_result_qa",
+    "output_dir": "results/qa_llm_judge_results_qwen37_plus_compare",
+    "csv_files": [
+      "benchmark_result_qa/qa_results_qwen37_plus_skill_guided.csv"
+    ]
+  }
+}
