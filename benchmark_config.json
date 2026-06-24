@@ -1,5 +1,5 @@
 {
-  "_comment": "Set OPENAI_API_KEY and OPENAI_BASE_URL in .env. Put all benchmark and judge model IDs here. Model IDs must be supported by your OpenAI-compatible endpoint.",
+  "_comment": "Set XMAPI_API_KEY/XMAPI_BASE_URL for the streamed /v1/responses gateway, or OPENAI_API_KEY/OPENAI_BASE_URL for /chat/completions. Put benchmark and judge model IDs here; use model_id='$XMAPI_MODEL' to read the model from env.",
   "object_counting": {
     "_comment": "Use structured_output=true only for models/endpoints that support OpenAI response_format=json_schema. Otherwise use false.",
     "_prompt_strategy_options": ["one_shot", "step_by_step", "self_refine", "two_pass_reflection"],

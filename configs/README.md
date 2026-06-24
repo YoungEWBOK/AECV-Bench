@@ -2,6 +2,24 @@
 
 All benchmark entrypoints accept `--config <json-file>`.
 
+## API Environment
+
+For the XMAPI streamed Responses gateway:
+
+```powershell
+set XMAPI_BASE_URL=https://www.cst9.cn
+set XMAPI_API_KEY=sk-your-api-key
+```
+
+`XMAPI_BASE_URL` automatically selects `/v1/responses` streaming mode. For a standard OpenAI-compatible chat-completions endpoint, use:
+
+```powershell
+set OPENAI_BASE_URL=https://your-endpoint/v1
+set OPENAI_API_KEY=sk-your-api-key
+```
+
+Models are normally selected in each config file via `model_id`. If you want to select the model from the environment, set `XMAPI_MODEL` and put `"model_id": "$XMAPI_MODEL"` in the JSON config.
+
 ## Presets
 
 | File | Use |
