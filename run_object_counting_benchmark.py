@@ -1,20 +1,31 @@
 """
 Run object counting benchmark on vision-language models and generate combined visualization.
 
-This unified script supports all VLM providers (OpenRouter, Cohere, Replicate) for
+This unified script supports VLM benchmarks through one OpenAI-compatible endpoint for
 AEC drawings object counting tasks.
 
 IMPORTANT: Only models that support vision/image input can be used here.
 """
 import os
+import argparse
 from dataclasses import dataclass
 from typing import List, Dict, Any, Optional
 from src.benchmark.processor import process_benchmark_floorplans
 from src.analyzers.openrouter import analyze_floorplan, analyze_floorplan_prompt_based
-from src.analyzers.cohere import analyze_floorplan_cohere
-from src.analyzers.replicate import analyze_floorplan_replicate
 from src.models.plan_elements import get_json_schema
-from src.utils.config import require_api_key
+from src.utils.config import require_llm_api_key, require_llm_base_url
+from src.utils.benchmark_config import (
+    DEFAULT_CONFIG_PATH,
+    get_enabled_models,
+    get_required_value,
+    get_section,
+    load_benchmark_config,
+)
+from src.utils.prompt_strategies import (
+    make_safe_name,
+    normalize_prompt_strategy,
+    prompt_strategy_suffix,
+)
 
 
 @dataclass
@@ -23,9 +34,11 @@ class ModelConfig:
     name: str
     model_id: str
     analyzer: callable
-    provider: str = "openrouter"  # openrouter, cohere, replicate
+    provider: str = "openai-compatible"
     note: Optional[str] = None
     enabled: bool = False
+    request_options: Optional[Dict[str, Any]] = None
+    prompt_strategy: str = "one_shot"
 
 
 class ModelRegistry:
@@ -34,13 +47,13 @@ class ModelRegistry:
     def __init__(self):
         self.models = [
             # =================================================================
-            # FLAGSHIP MULTIMODAL LLMS (OpenRouter)
+            # FLAGSHIP MULTIMODAL LLMS
             # =================================================================
             ModelConfig(
                 name="Gemini 3 Pro Preview",
                 model_id="google/gemini-3-pro-preview",
                 analyzer=analyze_floorplan,
-                provider="openrouter",
+                provider="openai-compatible",
                 note="Latest flagship model, high-precision multimodal reasoning",
                 enabled=False
             ),
@@ -48,7 +61,7 @@ class ModelRegistry:
                 name="Claude Opus 4.5",
                 model_id="anthropic/claude-opus-4.5",
                 analyzer=analyze_floorplan,
-                provider="openrouter",
+                provider="openai-compatible",
                 note="Most advanced Opus model with structured output support",
                 enabled=False
             ),
@@ -56,7 +69,7 @@ class ModelRegistry:
                 name="Claude Sonnet 4.5",
                 model_id="anthropic/claude-sonnet-4.5",
                 analyzer=analyze_floorplan,
-                provider="openrouter",
+                provider="openai-compatible",
                 note="Most advanced Sonnet with structured output support",
                 enabled=False
             ),
@@ -64,7 +77,7 @@ class ModelRegistry:
                 name="Claude Sonnet 4.6",
                 model_id="anthropic/claude-sonnet-4.6",
                 analyzer=analyze_floorplan,
-                provider="openrouter",
+                provider="openai-compatible",
                 note="Anthropic Claude Sonnet 4.6, latest Sonnet model",
                 enabled=False
             ),
@@ -72,7 +85,7 @@ class ModelRegistry:
                 name="Claude Opus 4.6",
                 model_id="anthropic/claude-opus-4.6",
                 analyzer=analyze_floorplan,
-                provider="openrouter",
+                provider="openai-compatible",
                 note="Anthropic Claude Opus 4.6, most advanced Opus model",
                 enabled=False
             ),
@@ -80,7 +93,7 @@ class ModelRegistry:
                 name="Gemini 3.1 Pro",
                 model_id="google/gemini-3.1-pro-preview",
                 analyzer=analyze_floorplan,
-                provider="openrouter",
+                provider="openai-compatible",
                 note="Gemini 3.1 Pro preview model",
                 enabled=False
             ),
@@ -88,7 +101,7 @@ class ModelRegistry:
                 name="Qwen 3.5 Plus",
                 model_id="qwen/qwen3.5-plus-02-15",
                 analyzer=analyze_floorplan,
-                provider="openrouter",
+                provider="openai-compatible",
                 note="Qwen 3.5 Plus model from February 2025",
                 enabled=False
             ),
@@ -96,7 +109,7 @@ class ModelRegistry:
                 name="Grok 4.1 Fast",
                 model_id="x-ai/grok-4.1-fast",
                 analyzer=analyze_floorplan,
-                provider="openrouter",
+                provider="openai-compatible",
                 note="Best agentic tool calling model, 2M context",
                 enabled=False
             ),
@@ -104,7 +117,7 @@ class ModelRegistry:
                 name="Mistral Large 2512",
                 model_id="mistralai/mistral-large-2512",
                 analyzer=analyze_floorplan,
-                provider="openrouter",
+                provider="openai-compatible",
                 note="Mistral Large model from December 2025",
                 enabled=False
             ),
@@ -112,7 +125,7 @@ class ModelRegistry:
                 name="OpenAI GPT-5.1",
                 model_id="openai/gpt-5.1",
                 analyzer=analyze_floorplan,
-                provider="openrouter",
+                provider="openai-compatible",
                 note="OpenAI GPT-5.1 model, balanced performance with dual modes",
                 enabled=False
             ),
@@ -120,7 +133,7 @@ class ModelRegistry:
                 name="OpenAI GPT-5.2",
                 model_id="openai/gpt-5.2",
                 analyzer=analyze_floorplan,
-                provider="openrouter",
+                provider="openai-compatible",
                 note="OpenAI GPT-5.2 model, advanced multimodal capabilities",
                 enabled=False
             ),
@@ -128,7 +141,7 @@ class ModelRegistry:
                 name="OpenAI GPT-5.3",
                 model_id="openai/gpt-5.3-chat",
                 analyzer=analyze_floorplan,
-                provider="openrouter",
+                provider="openai-compatible",
                 note="OpenAI GPT-5.3 Chat model",
                 enabled=False
             ),
@@ -136,7 +149,7 @@ class ModelRegistry:
                 name="OpenAI GPT-5.4",
                 model_id="openai/gpt-5.4",
                 analyzer=analyze_floorplan,
-                provider="openrouter",
+                provider="openai-compatible",
                 note="OpenAI GPT-5.4 model",
                 enabled=True
             ),
@@ -144,19 +157,19 @@ class ModelRegistry:
                 name="Amazon Nova 2 Lite v1",
                 model_id="amazon/nova-2-lite-v1",
                 analyzer=analyze_floorplan_prompt_based,
-                provider="openrouter",
+                provider="openai-compatible",
                 note="Amazon Nova 2 Lite multimodal language model",
                 enabled=False
             ),
 
             # =================================================================
-            # VISION-SPECIALIZED MODELS (OpenRouter)
+            # VISION-SPECIALIZED MODELS
             # =================================================================
             ModelConfig(
                 name="Qwen3 VL 235B A22B Thinking",
                 model_id="qwen/qwen3-vl-235b-a22b-thinking",
                 analyzer=analyze_floorplan_prompt_based,
-                provider="openrouter",
+                provider="openai-compatible",
                 note="235B Qwen3 thinking model - better reasoning, slower throughput",
                 enabled=False
             ),
@@ -164,7 +177,7 @@ class ModelRegistry:
                 name="OpenAI GPT-4 Vision",
                 model_id="openai/gpt-4o",
                 analyzer=analyze_floorplan_prompt_based,
-                provider="openrouter",
+                provider="openai-compatible",
                 note="GPT-4o multimodal model (uses prompt-based JSON extraction)",
                 enabled=False
             ),
@@ -172,7 +185,7 @@ class ModelRegistry:
                 name="Qwen3-VL 8B Instruct",
                 model_id="qwen/qwen3-vl-8b-instruct",
                 analyzer=analyze_floorplan_prompt_based,
-                provider="openrouter",
+                provider="openai-compatible",
                 note="8B Qwen3 vision-language model - efficient and fast",
                 enabled=False
             ),
@@ -180,7 +193,7 @@ class ModelRegistry:
                 name="Qwen3-VL 8B Thinking",
                 model_id="qwen/qwen3-vl-8b-thinking",
                 analyzer=analyze_floorplan_prompt_based,
-                provider="openrouter",
+                provider="openai-compatible",
                 note="8B Qwen3 thinking model - better reasoning, slower throughput",
                 enabled=False
             ),
@@ -188,7 +201,7 @@ class ModelRegistry:
                 name="GLM-4.5V",
                 model_id="z-ai/glm-4.5v",
                 analyzer=analyze_floorplan_prompt_based,
-                provider="openrouter",
+                provider="openai-compatible",
                 note="Z-AI vision-language model (uses prompt-based JSON extraction)",
                 enabled=False
             ),
@@ -196,7 +209,7 @@ class ModelRegistry:
                 name="GLM-4.6V",
                 model_id="z-ai/glm-4.6v",
                 analyzer=analyze_floorplan_prompt_based,
-                provider="openrouter",
+                provider="openai-compatible",
                 note="Z-AI vision-language model - newer version",
                 enabled=False
             ),
@@ -204,7 +217,7 @@ class ModelRegistry:
                 name="NVIDIA Nemotron Nano 12B V2 VL",
                 model_id="nvidia/nemotron-nano-12b-v2-vl",
                 analyzer=analyze_floorplan_prompt_based,
-                provider="openrouter",
+                provider="openai-compatible",
                 note="NVIDIA Nemotron Nano 12B V2 vision-language model",
                 enabled=False
             ),
@@ -212,32 +225,29 @@ class ModelRegistry:
                 name="Llama Nemotron Embed VL 1B V2",
                 model_id="nvidia/llama-nemotron-embed-vl-1b-v2:free",
                 analyzer=analyze_floorplan_prompt_based,
-                provider="openrouter",
+                provider="openai-compatible",
                 note="Nvidia Llama Nemotron Embed VL 1B V2 vision-language model (free)",
                 enabled=False
             ),
 
             # =================================================================
-            # COHERE MODELS
+            # LEGACY MODEL IDS, STILL SENT THROUGH THE OPENAI-COMPATIBLE ENDPOINT
             # =================================================================
             ModelConfig(
                 name="Cohere Command A Vision",
                 model_id="command-a-vision-07-2025",
-                analyzer=analyze_floorplan_cohere,
-                provider="cohere",
+                analyzer=analyze_floorplan_prompt_based,
+                provider="openai-compatible",
                 note="Cohere Command A Vision - multimodal model for document analysis",
                 enabled=False
             ),
 
-            # =================================================================
-            # REPLICATE MODELS
-            # =================================================================
             ModelConfig(
                 name="DeepSeek VL2",
                 model_id="deepseek-ai/deepseek-vl2:e5caf557dd9e5dcee46442e1315291ef1867f027991ede8ff95e304d4f734200",
-                analyzer=analyze_floorplan_replicate,
-                provider="replicate",
-                note="DeepSeek VL2 vision-language model via Replicate API",
+                analyzer=analyze_floorplan_prompt_based,
+                provider="openai-compatible",
+                note="DeepSeek VL2 vision-language model id sent through the configured endpoint",
                 enabled=False
             ),
         ]
@@ -271,38 +281,47 @@ class ModelRegistry:
 class BenchmarkRunner:
     """Handles running vision model benchmarks with proper separation of concerns."""
 
-    def __init__(self, benchmark_dir: str, output_dir: str, num_folders: int):
+    def __init__(self, benchmark_dir: str, output_dir: str, num_folders: int, force: bool = False):
         self.benchmark_dir = benchmark_dir
         self.output_dir = output_dir
         self.num_folders = num_folders
+        self.force = force
 
-        # Load API keys for all providers
-        self.api_keys = {
-            'openrouter': require_api_key('OPEN_ROUTER_API_KEY', 'OpenRouter'),
-            'cohere': require_api_key('COHERE_API_KEY', 'Cohere'),
-            'replicate': require_api_key('REPLICATE_API_TOKEN', 'Replicate')
-        }
+        self.llm_api_key = require_llm_api_key()
+        self.llm_base_url = require_llm_base_url()
 
         os.makedirs(output_dir, exist_ok=True)
 
     def _create_safe_filename(self, model_name: str) -> str:
         """Create filesystem-safe filename from model name."""
-        return model_name.lower().replace(" ", "_").replace(".", "").replace("-", "_")
+        return make_safe_name(model_name)
 
     def _run_single_model(self, model_config: ModelConfig) -> Dict[str, Any]:
         """Run benchmark for a single vision model."""
         safe_name = self._create_safe_filename(model_config.name)
+        strategy_suffix = prompt_strategy_suffix(model_config.prompt_strategy)
+        display_name = model_config.name
+        if strategy_suffix:
+            safe_name = f"{safe_name}_{strategy_suffix}"
+            display_name = f"{model_config.name} ({model_config.prompt_strategy})"
         output_csv = os.path.join(self.output_dir, f"{safe_name}.csv")
         output_json_name = f"{safe_name}.json"
 
         print(f"  Model ID: {model_config.model_id}")
         print(f"  Provider: {model_config.provider}")
+        print(f"  Prompt strategy: {model_config.prompt_strategy}")
+        if model_config.request_options and model_config.request_options.get("skill_library_path"):
+            print(
+                "  Skill library: "
+                f"{model_config.request_options['skill_library_path']} "
+                f"(statuses={model_config.request_options.get('skill_statuses', ['accepted'])}, "
+                f"max {model_config.request_options.get('max_skills_per_question', 4)}/request)"
+            )
         if model_config.note:
             print(f"  Note: {model_config.note}")
         print(f"  Output: {output_csv}")
         print("-" * 60)
 
-        # Build parameters based on provider
         base_params = {
             "benchmark_dir": self.benchmark_dir,
             "output_csv": output_csv,
@@ -311,24 +330,18 @@ class BenchmarkRunner:
             "model_name": model_config.model_id,
             "json_schema": get_json_schema(),
             "analyzer_func": model_config.analyzer,
+            "open_router_api_key": self.llm_api_key,
+            "url": self.llm_base_url,
+            "force": self.force,
         }
-
-        # Add provider-specific parameters
-        if model_config.provider == "cohere":
-            base_params["cohere_api_key"] = self.api_keys['cohere']
-        elif model_config.provider == "replicate":
-            base_params["replicate_api_token"] = self.api_keys['replicate']
-        else:  # openrouter
-            base_params.update({
-                "open_router_api_key": self.api_keys['openrouter'],
-                "url": "https://openrouter.ai/api/v1/chat/completions"
-            })
+        if model_config.request_options:
+            base_params.update(model_config.request_options)
 
         # Run benchmark
         process_benchmark_floorplans(**base_params)
 
         return {
-            "name": model_config.name,
+            "name": display_name,
             "csv": output_csv,
             "status": "success"
         }
@@ -353,9 +366,16 @@ class BenchmarkRunner:
                 print(f"[SUCCESS] {model_config.name} completed")
             except Exception as e:
                 print(f"[ERROR] {model_config.name} failed: {e}")
+                failed_safe_name = self._create_safe_filename(model_config.name)
+                failed_strategy_suffix = prompt_strategy_suffix(model_config.prompt_strategy)
+                if failed_strategy_suffix:
+                    failed_safe_name = f"{failed_safe_name}_{failed_strategy_suffix}"
+                failed_display_name = model_config.name
+                if failed_strategy_suffix:
+                    failed_display_name = f"{model_config.name} ({model_config.prompt_strategy})"
                 results_summary.append({
-                    "name": model_config.name,
-                    "csv": os.path.join(self.output_dir, f"{self._create_safe_filename(model_config.name)}.csv"),
+                    "name": failed_display_name,
+                    "csv": os.path.join(self.output_dir, f"{failed_safe_name}.csv"),
                     "status": "failed",
                     "error": str(e)
                 })
@@ -394,25 +414,73 @@ def generate_visualization(results: List[Dict[str, Any]]):
     )
 
 
+def build_model_configs(model_entries: List[Dict[str, Any]], object_config: Dict[str, Any]) -> List[ModelConfig]:
+    """Build ModelConfig objects from benchmark_config.json entries."""
+    model_configs = []
+    for entry in model_entries:
+        analyzer = analyze_floorplan if entry.get("structured_output", False) else analyze_floorplan_prompt_based
+        prompt_strategy = normalize_prompt_strategy(entry.get("prompt_strategy", object_config.get("prompt_strategy", "one_shot")))
+        request_options = {}
+        for key in ("request_timeout", "max_retries", "retry_delay"):
+            value = entry.get(key, object_config.get(key))
+            if value is not None:
+                request_options["timeout" if key == "request_timeout" else key] = int(value)
+        request_options["prompt_strategy"] = prompt_strategy
+        skill_library_path = entry.get("skill_library_path", object_config.get("skill_library_path", ""))
+        if skill_library_path:
+            request_options["skill_library_path"] = skill_library_path
+            request_options["max_skills_per_question"] = int(
+                entry.get("max_skills_per_question", object_config.get("max_skills_per_question", 4))
+            )
+            skill_statuses = entry.get("skill_statuses", object_config.get("skill_statuses", ["accepted"]))
+            if isinstance(skill_statuses, str):
+                skill_statuses = [item.strip() for item in skill_statuses.split(",") if item.strip()]
+            request_options["skill_statuses"] = skill_statuses
+        model_configs.append(
+            ModelConfig(
+                name=entry["name"],
+                model_id=entry["model_id"],
+                analyzer=analyzer,
+                provider=entry.get("provider", "openai-compatible"),
+                note=entry.get("note"),
+                enabled=True,
+                request_options=request_options,
+                prompt_strategy=prompt_strategy,
+            )
+        )
+    return model_configs
+
+
 def main():
     """Main execution function."""
-    # Configuration
-    benchmark_dir = r"data/Use Case 1 - Object Counting/1 - Full Datasets"
-    output_dir = "benchmark_result_object_counting"
-    num_folders = 120  # Running on all folders
+    parser = argparse.ArgumentParser(description="Run object counting benchmark")
+    parser.add_argument(
+        "--config",
+        type=str,
+        default=DEFAULT_CONFIG_PATH,
+        help=f"Benchmark config JSON path (default: {DEFAULT_CONFIG_PATH})",
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite existing object counting CSVs and rerun all samples for enabled models.",
+    )
+    args = parser.parse_args()
 
-    # Initialize model registry and runner
-    model_registry = ModelRegistry()
-    benchmark_runner = BenchmarkRunner(benchmark_dir, output_dir, num_folders)
+    config = load_benchmark_config(args.config)
+    object_config = get_section(config, "object_counting")
+    benchmark_dir = get_required_value(object_config, "benchmark_dir", "object_counting")
+    output_dir = get_required_value(object_config, "output_dir", "object_counting")
+    num_folders = int(get_required_value(object_config, "num_folders", "object_counting"))
 
-    # Get enabled models
-    enabled_models = model_registry.get_enabled_models()
+    force = args.force or bool(object_config.get("force", False))
+    benchmark_runner = BenchmarkRunner(benchmark_dir, output_dir, num_folders, force=force)
+
+    enabled_models = build_model_configs(get_enabled_models(object_config, "object_counting"), object_config)
 
     if not enabled_models:
         print("No models are enabled for benchmarking.")
-        print("Enable models by editing the ModelRegistry or using:")
-        print("  registry.enable_model('Model Name')")
-        model_registry.list_models()
+        print(f"Enable models in {args.config} under object_counting.models")
         return
 
     # Run benchmark

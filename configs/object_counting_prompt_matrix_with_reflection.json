@@ -1,0 +1,59 @@
+{
+  "_comment": "Object-counting prompt-strategy matrix including two-pass reflection. This costs about 2x for that strategy.",
+  "object_counting": {
+    "benchmark_dir": "data/Use Case 1 - Object Counting/1 - Full Datasets",
+    "output_dir": "benchmark_result_object_counting",
+    "num_folders": 20,
+    "request_timeout": 300,
+    "max_retries": 3,
+    "retry_delay": 5,
+    "models": [
+      {
+        "name": "OpenAI GPT-5.5",
+        "model_id": "gpt-5.5",
+        "enabled": true,
+        "prompt_strategy": "one_shot",
+        "structured_output": false
+      },
+      {
+        "name": "OpenAI GPT-5.5",
+        "model_id": "gpt-5.5",
+        "enabled": true,
+        "prompt_strategy": "step_by_step",
+        "structured_output": false
+      },
+      {
+        "name": "OpenAI GPT-5.5",
+        "model_id": "gpt-5.5",
+        "enabled": true,
+        "prompt_strategy": "self_refine",
+        "structured_output": false
+      },
+      {
+        "name": "OpenAI GPT-5.5",
+        "model_id": "gpt-5.5",
+        "enabled": true,
+        "prompt_strategy": "two_pass_reflection",
+        "structured_output": false
+      }
+    ]
+  },
+  "qa": {
+    "images_dir": "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/images",
+    "labels_dir": "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/labels",
+    "output_dir": "benchmark_result_qa",
+    "models": [
+      {
+        "name": "API Gemini 3.1 Pro",
+        "model_id": "gemini-3.1-pro-preview",
+        "enabled": false,
+        "prompt_strategy": "one_shot"
+      }
+    ]
+  },
+  "judge": {
+    "model_id": "gpt-4o",
+    "input_dir": "benchmark_result_qa",
+    "output_dir": "results/qa_llm_judge_results"
+  }
+}

@@ -1,27 +1,27 @@
 """
 LLM-based evaluation system for QA benchmark results.
 
-Uses an LLM judge (via OpenRouter) to evaluate if model answers are correct
+Uses an OpenAI-compatible LLM judge to evaluate if model answers are correct
 compared to ground truth. Returns binary scores: 1.0 for correct, 0.0 for incorrect.
 """
 import csv
-import time
+import os
 from typing import Dict, Optional
 from collections import defaultdict
 import numpy as np
-import requests
 
-from ..utils.config import get_open_router_api_key, require_api_key
+from ..utils.config import require_llm_api_key, require_llm_base_url
+from ..utils.openai_compatible import chat_completion_content
 
 
 class QAEvaluator:
-    """Evaluates QA answers using LLM-as-Judge via OpenRouter."""
+    """Evaluates QA answers using LLM-as-Judge via an OpenAI-compatible endpoint."""
     
     def __init__(
         self,
         judge_model: str = "openai/gpt-4o",
         open_router_api_key: Optional[str] = None,
-        url: str = "https://openrouter.ai/api/v1/chat/completions",
+        url: str = None,
         temperature: float = 0.0
     ):
         """
@@ -29,21 +29,21 @@ class QAEvaluator:
         
         Args:
             judge_model: Model identifier for the judge LLM (default: openai/gpt-4o)
-            open_router_api_key: OpenRouter API key (if None, will try to get from env)
-            url: OpenRouter API URL
+            open_router_api_key: API key override (if None, uses OPENAI_API_KEY/API_KEY)
+            url: Base URL override (if None, uses OPENAI_BASE_URL/BASE_URL)
             temperature: Temperature for judge model (default 0.0 for deterministic)
         """
         self.judge_model = judge_model
-        self.url = url
+        self.base_url = url or require_llm_base_url()
         self.temperature = temperature
         
         # Get API key
         if open_router_api_key is None or not open_router_api_key.strip():
-            self.api_key = require_api_key("OPEN_ROUTER_API_KEY", "OpenRouter")
+            self.api_key = require_llm_api_key()
         else:
             self.api_key = open_router_api_key.strip()
     
-    def judge_answer(self, question: str, ground_truth: str, model_answer: str) -> float:
+    def judge_answer(self, question: str, ground_truth: str, model_answer: str) -> Optional[float]:
         """
         Use LLM to judge if the model answer is correct compared to ground truth.
         
@@ -53,7 +53,7 @@ class QAEvaluator:
             model_answer: The model's answer
             
         Returns:
-            1.0 if the answer is correct/contextually similar, 0.0 if incorrect/opposite
+            1.0 if correct, 0.0 if incorrect, or None if the judge call itself failed
         """
         # Prepare the evaluation prompt
         prompt = f"""You are an expert evaluator for question-answering tasks. Your task is to determine if a model's answer is correct compared to the ground truth answer.
@@ -75,12 +75,6 @@ Respond with ONLY a single number:
 
 Your response (just the number, nothing else):"""
 
-        # Prepare headers
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
-        }
-
         # Build the message payload
         messages = [
             {
@@ -89,56 +83,23 @@ Your response (just the number, nothing else):"""
             }
         ]
 
-        payload = {
-            "model": self.judge_model,
-            "messages": messages,
-            "temperature": self.temperature
-        }
-
-        # Make API call with retry logic
-        max_retries = 3
-        retry_delay = 2
-        
-        for attempt in range(max_retries):
-            try:
-                resp = requests.post(self.url, headers=headers, json=payload, timeout=60)
-                resp.raise_for_status()
-                break
-            except requests.exceptions.HTTPError as e:
-                error_msg = f"{e}"
-                try:
-                    if hasattr(e, 'response') and e.response is not None:
-                        error_detail = e.response.json() if e.response.content else {}
-                        error_msg = f"{e}: {error_detail}"
-                except:
-                    pass
-                if attempt < max_retries - 1:
-                    wait_time = retry_delay * (2 ** attempt)
-                    print(f"[RETRY] Attempt {attempt + 1}/{max_retries} failed: {error_msg}. Retrying in {wait_time}s...")
-                    time.sleep(wait_time)
-                else:
-                    print(f"[ERROR] Failed to evaluate after {max_retries} attempts: {error_msg}")
-                    return 0.0
-            except (requests.exceptions.ConnectionError, 
-                    requests.exceptions.Timeout,
-                    requests.exceptions.RequestException) as e:
-                if attempt < max_retries - 1:
-                    wait_time = retry_delay * (2 ** attempt)
-                    print(f"[RETRY] Attempt {attempt + 1}/{max_retries} failed: {type(e).__name__}. Retrying in {wait_time}s...")
-                    time.sleep(wait_time)
-                else:
-                    print(f"[ERROR] Failed to evaluate after {max_retries} attempts: {e}")
-                    return 0.0
-
         # Parse response
         try:
-            resp_json = resp.json()
-            content = resp_json["choices"][0]["message"]["content"].strip()
+            content = chat_completion_content(
+                model=self.judge_model,
+                messages=messages,
+                api_key=self.api_key,
+                base_url=self.base_url,
+                temperature=self.temperature,
+                timeout=60,
+                max_retries=3,
+                request_label="QA judge evaluation",
+            ).strip()
             
             # Extract score (look for 1 or 0 in the response)
             if not content:
                 print(f"[WARN] Empty response from judge model")
-                return 0.0
+                return None
             
             # Try to extract 1 or 0 from response
             content_lower = content.lower()
@@ -162,12 +123,12 @@ Your response (just the number, nothing else):"""
                     score = float(content.strip())
                     return 1.0 if score >= 0.5 else 0.0
                 except:
-                    print(f"[WARN] Could not parse judge response: {content}. Defaulting to 0.0")
-                    return 0.0
+                    print(f"[WARN] Could not parse judge response: {content}. Will retry on a future run.")
+                    return None
                     
-        except (KeyError, IndexError, ValueError) as e:
+        except Exception as e:
             print(f"[ERROR] Failed to parse judge response: {e}")
-            return 0.0
+            return None
     
     def evaluate_answer(self, question: str, ground_truth: str, model_answer: str, task: str = "", qa_type: str = "") -> Dict[str, float]:
         """
@@ -183,23 +144,36 @@ Your response (just the number, nothing else):"""
         Returns:
             Dictionary with evaluation score (binary: 1.0 or 0.0)
         """
-        # Skip error answers
+        # Source QA errors count as incorrect without spending judge tokens.
         if model_answer.startswith('[ERROR:'):
-            score = 0.0
+            return {
+                'score': 0.0,
+                'overall': 0.0,
+                'evaluation_status': 'source_error',
+            }
         else:
             score = self.judge_answer(question, ground_truth, model_answer)
+
+        if score is None:
+            return {
+                'score': None,
+                'overall': None,
+                'evaluation_status': 'judge_error',
+            }
         
         return {
             'score': score,
-            'overall': score  # For compatibility with existing code
+            'overall': score,  # For compatibility with existing code
+            'evaluation_status': 'ok',
         }
     
-    def evaluate_csv(self, csv_path: str) -> Dict:
+    def evaluate_csv(self, csv_path: str, output_csv: Optional[str] = None, force: bool = False) -> Dict:
         """
         Evaluate all answers in a QA results CSV file.
         
         Args:
             csv_path: Path to the CSV file with QA results
+            output_csv: Optional path to stream individual evaluation rows as they finish
             
         Returns:
             Dictionary with evaluation results and statistics
@@ -207,6 +181,78 @@ Your response (just the number, nothing else):"""
         results = []
         task_stats = defaultdict(lambda: {'total': 0, 'scores': []})
         qa_type_stats = defaultdict(lambda: {'total': 0, 'scores': []})
+        fieldnames = [
+            'image_id',
+            'qa_id',
+            'task',
+            'qa_type',
+            'question',
+            'ground_truth',
+            'predicted',
+            'score',
+            'overall',
+            'evaluation_status',
+        ]
+
+        def result_key(result: Dict):
+            return (result.get('image_id', ''), result.get('qa_id', ''), result.get('qa_type', ''))
+
+        def add_result(result: Dict):
+            results.append(result)
+            task = result.get('task', 'unknown')
+            qa_type = result.get('qa_type', 'unknown')
+            overall = float(result['overall'])
+            task_stats[task]['total'] += 1
+            task_stats[task]['scores'].append(overall)
+            qa_type_stats[qa_type]['total'] += 1
+            qa_type_stats[qa_type]['scores'].append(overall)
+
+        completed_keys = set()
+        if output_csv:
+            output_dir = os.path.dirname(output_csv)
+            if output_dir:
+                os.makedirs(output_dir, exist_ok=True)
+            if force and os.path.isfile(output_csv):
+                os.remove(output_csv)
+
+            existing_rows = []
+            resume_sources = [output_csv]
+            legacy_tmp_csv = f"{output_csv}.tmp"
+            if os.path.isfile(legacy_tmp_csv):
+                resume_sources.append(legacy_tmp_csv)
+
+            for resume_csv in resume_sources:
+                if not os.path.isfile(resume_csv):
+                    continue
+                with open(resume_csv, 'r', newline='', encoding='utf-8') as f:
+                    reader = csv.DictReader(f)
+                    for existing in reader:
+                        if not existing.get('score') or not existing.get('overall'):
+                            continue
+                        try:
+                            existing['score'] = float(existing['score'])
+                            existing['overall'] = float(existing['overall'])
+                        except (TypeError, ValueError):
+                            continue
+                        existing.setdefault('evaluation_status', 'ok')
+                        key = result_key(existing)
+                        if key in completed_keys:
+                            continue
+                        completed_keys.add(key)
+                        existing_rows.append(existing)
+                        add_result(existing)
+
+            # Normalize headers so future appends include evaluation_status.
+            with open(output_csv, 'w', newline='', encoding='utf-8') as f:
+                writer = csv.DictWriter(f, fieldnames=fieldnames)
+                writer.writeheader()
+                for existing in existing_rows:
+                    writer.writerow(existing)
+
+            if completed_keys:
+                print(f"Resuming judge evaluation from {output_csv} ({len(completed_keys)} completed rows)")
+                if os.path.isfile(legacy_tmp_csv):
+                    print(f"  Recovered rows from legacy temp file: {legacy_tmp_csv}")
         
         with open(csv_path, 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
@@ -223,12 +269,19 @@ Your response (just the number, nothing else):"""
                 qa_type = row.get('qa_type', 'unknown')
                 qa_id = row.get('qa_id', '')
                 image_id = row.get('image_id', '')
+                key = (image_id, qa_id, qa_type)
+                if key in completed_keys:
+                    continue
                 
                 # Evaluate using LLM judge
                 if idx % 10 == 0:
                     print(f"  Progress: {idx}/{total_rows} ({100*idx/total_rows:.1f}%)")
                 
                 scores = self.evaluate_answer(question, ground_truth, predicted, task, qa_type)
+                if scores.get('overall') is None:
+                    status = scores.get('evaluation_status', 'judge_error')
+                    print(f"[WARN] Skipping {qa_id or idx}: {status}. It will be retried on a future run.")
+                    continue
                 
                 result = {
                     'image_id': image_id,
@@ -239,17 +292,19 @@ Your response (just the number, nothing else):"""
                     'ground_truth': ground_truth,
                     'predicted': predicted,
                     'score': scores['score'],
-                    'overall': scores['overall']
+                    'overall': scores['overall'],
+                    'evaluation_status': scores.get('evaluation_status', 'ok')
                 }
-                results.append(result)
+                add_result(result)
+                completed_keys.add(key)
+
+                if output_csv:
+                    with open(output_csv, 'a', newline='', encoding='utf-8') as f:
+                        writer = csv.DictWriter(f, fieldnames=fieldnames)
+                        writer.writerow(result)
+                        f.flush()
                 
-                # Update statistics
-                task_stats[task]['total'] += 1
-                task_stats[task]['scores'].append(scores['overall'])
-                
-                qa_type_stats[qa_type]['total'] += 1
-                qa_type_stats[qa_type]['scores'].append(scores['overall'])
-        
+
         # Compute aggregate statistics
         if results:
             overall_scores = [r['overall'] for r in results]

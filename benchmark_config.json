@@ -1,0 +1,90 @@
+{
+  "_comment": "Set OPENAI_API_KEY and OPENAI_BASE_URL in .env. Put all benchmark and judge model IDs here. Model IDs must be supported by your OpenAI-compatible endpoint.",
+  "object_counting": {
+    "_comment": "Use structured_output=true only for models/endpoints that support OpenAI response_format=json_schema. Otherwise use false.",
+    "_prompt_strategy_options": ["one_shot", "step_by_step", "self_refine", "two_pass_reflection"],
+    "benchmark_dir": "data/Use Case 1 - Object Counting/1 - Full Datasets",
+    "output_dir": "benchmark_result_object_counting",
+    "num_folders": 120,
+    "request_timeout": 300,
+    "max_retries": 3,
+    "retry_delay": 5,
+    "models": [
+      {
+        "name": "OpenAI GPT-5.5",
+        "model_id": "gpt-5.5",
+        "enabled": true,
+        "prompt_strategy": "one_shot",
+        "structured_output": false,
+        "note": "Replace model_id with a vision-capable model supported by your OpenAI-compatible endpoint."
+      },
+      {
+        "name": "OpenAI GPT-5.5",
+        "model_id": "gpt-5.5",
+        "enabled": false,
+        "prompt_strategy": "step_by_step",
+        "structured_output": false,
+        "note": "Ablation template: internal step-by-step counting, final JSON only."
+      },
+      {
+        "name": "OpenAI GPT-5.5",
+        "model_id": "gpt-5.5",
+        "enabled": false,
+        "prompt_strategy": "self_refine",
+        "structured_output": false,
+        "note": "Ablation template: one-call internal draft plus self-check, final JSON only."
+      },
+      {
+        "name": "OpenAI GPT-5.5",
+        "model_id": "gpt-5.5",
+        "enabled": false,
+        "prompt_strategy": "two_pass_reflection",
+        "structured_output": false,
+        "note": "Ablation template: two API calls per image; first count, then reflection/correction."
+      }
+    ]
+  },
+  "qa": {
+    "_comment": "All enabled models here are asked visual QA questions with image_url data URLs.",
+    "_prompt_strategy_options": ["one_shot", "step_by_step", "self_refine", "two_pass_reflection"],
+    "images_dir": "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/images",
+    "labels_dir": "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/labels",
+    "output_dir": "benchmark_result_qa",
+    "models": [
+      {
+        "name": "API Gemini 3.1 Pro",
+        "model_id": "gemini-3.1-pro-preview",
+        "enabled": true,
+        "prompt_strategy": "one_shot",
+        "note": "Replace model_id with a vision-capable model supported by your OpenAI-compatible endpoint."
+      },
+      {
+        "name": "API Gemini 3.1 Pro",
+        "model_id": "gemini-3.1-pro-preview",
+        "enabled": false,
+        "prompt_strategy": "step_by_step",
+        "note": "Ablation template: internal step-by-step QA, final concise answer only."
+      },
+      {
+        "name": "API Gemini 3.1 Pro",
+        "model_id": "gemini-3.1-pro-preview",
+        "enabled": false,
+        "prompt_strategy": "self_refine",
+        "note": "Ablation template: one-call internal draft plus self-check, final concise answer only."
+      },
+      {
+        "name": "API Gemini 3.1 Pro",
+        "model_id": "gemini-3.1-pro-preview",
+        "enabled": false,
+        "prompt_strategy": "two_pass_reflection",
+        "note": "Ablation template: two API calls per question; initial answer then reflection/correction."
+      }
+    ]
+  },
+  "judge": {
+    "_comment": "This model evaluates QA result CSV files. It does not need vision input, but should be strong at text judgment.",
+    "model_id": "gpt-4o",
+    "input_dir": "benchmark_result_qa",
+    "output_dir": "results/qa_llm_judge_results"
+  }
+}

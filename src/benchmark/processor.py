@@ -9,6 +9,7 @@ from dataclasses import dataclass, field
 from typing import Callable, Dict, Optional, List, Any
 from ..analyzers.openrouter import analyze_floorplan
 from ..models.plan_elements import get_json_schema
+from ..utils.validators import validate_floor_plan_result
 
 
 @dataclass
@@ -18,6 +19,7 @@ class BenchmarkConfig:
     output_csv: str
     output_json_name: str
     num_folders: int
+    force: bool = False
 
 
 @dataclass 
@@ -37,13 +39,11 @@ class AnalyzerConfig:
     """Configuration for analyzer function and its parameters."""
     analyzer_func: Optional[Callable] = None
     open_router_api_key: Optional[str] = None
-    url: str = "https://openrouter.ai/api/v1/chat/completions"
+    url: Optional[str] = None
     analyzer_kwargs: Dict[str, Any] = field(default_factory=dict)
     
     def __post_init__(self):
         if self.analyzer_func is None:
-            if self.open_router_api_key is None:
-                raise ValueError("open_router_api_key is required when using default analyzer")
             self.analyzer_func = analyze_floorplan
 
 
@@ -145,7 +145,8 @@ class AnalyzerRunner:
                 json_schema=model_config.json_schema,
                 open_router_api_key=analyzer_config.open_router_api_key,
                 url=analyzer_config.url,
-                temperature=model_config.temperature
+                temperature=model_config.temperature,
+                **analyzer_config.analyzer_kwargs,
             )
         else:
             # Custom analyzer - build parameters dynamically
@@ -165,12 +166,13 @@ class AnalyzerRunner:
         is_cohere_analyzer = "cohere_api_key" in analyzer_config.analyzer_kwargs
         is_replicate_analyzer = "replicate_api_token" in analyzer_config.analyzer_kwargs
         
+        if "url" not in kwargs and analyzer_config.url is not None:
+            kwargs["url"] = analyzer_config.url
+
         if not is_cohere_analyzer and not is_replicate_analyzer:
-            # For OpenRouter analyzers, add standard parameters
+            # For OpenAI-compatible analyzers, add the API key override when available.
             if "open_router_api_key" not in kwargs and analyzer_config.open_router_api_key is not None:
                 kwargs["open_router_api_key"] = analyzer_config.open_router_api_key
-            if "url" not in kwargs:
-                kwargs["url"] = analyzer_config.url
         
         if "temperature" not in kwargs:
             kwargs["temperature"] = model_config.temperature
@@ -211,6 +213,101 @@ class ResultAggregator:
         except Exception as e:
             print(f"[ERROR] Could not prepare CSV row for '{folder_info.name}': {e}")
             return None
+
+    def initialize_csv(self, output_csv: str) -> bool:
+        """Create a CSV file with headers before streaming rows into it."""
+        try:
+            output_dir = os.path.dirname(output_csv)
+            if output_dir:
+                os.makedirs(output_dir, exist_ok=True)
+            if os.path.isfile(output_csv):
+                return True
+            with open(output_csv, "w", newline="", encoding="utf-8") as csvfile:
+                writer = csv.DictWriter(csvfile, fieldnames=["name", "original", "extracted"])
+                writer.writeheader()
+            return True
+        except Exception as e:
+            print(f"[ERROR] Could not initialize CSV '{output_csv}': {e}")
+            return False
+
+    def load_processed_names(self, output_csv: str) -> set:
+        """Load valid completed sample names and clean invalid streamed rows.
+
+        A resumable CSV may contain empty, partial, or malformed rows if a previous
+        run was interrupted or older code wrote placeholders. Only rows with valid
+        original/extracted floor-plan counts are considered complete.
+        """
+        if not os.path.isfile(output_csv):
+            return set()
+        try:
+            valid_rows_by_name = {}
+            invalid_rows = 0
+            duplicate_rows = 0
+
+            with open(output_csv, "r", newline="", encoding="utf-8") as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    name = (row.get("name") or "").strip()
+                    if not name or not self._is_valid_streamed_row(row):
+                        invalid_rows += 1
+                        continue
+                    if name in valid_rows_by_name:
+                        duplicate_rows += 1
+                    valid_rows_by_name[name] = {
+                        "name": name,
+                        "original": row.get("original", ""),
+                        "extracted": row.get("extracted", ""),
+                    }
+
+            removed_rows = invalid_rows + duplicate_rows
+            if removed_rows:
+                with open(output_csv, "w", newline="", encoding="utf-8") as csvfile:
+                    writer = csv.DictWriter(csvfile, fieldnames=["name", "original", "extracted"])
+                    writer.writeheader()
+                    for row in valid_rows_by_name.values():
+                        writer.writerow(row)
+                print(
+                    f"[RESUME] Removed {removed_rows} invalid/duplicate row(s) from "
+                    f"'{output_csv}'. Those samples will be rerun if present in the dataset."
+                )
+
+            return set(valid_rows_by_name)
+        except Exception as e:
+            print(f"[WARN] Could not read existing CSV '{output_csv}' for resume: {e}")
+            return set()
+
+    def _is_valid_streamed_row(self, row: Dict) -> bool:
+        """Return True when a streamed CSV row is a usable completed result."""
+        original = self._loads_json_object(row.get("original"))
+        extracted = self._loads_json_object(row.get("extracted"))
+        return (
+            original is not None
+            and extracted is not None
+            and validate_floor_plan_result(original)
+            and validate_floor_plan_result(extracted)
+        )
+
+    def _loads_json_object(self, value: Any) -> Optional[Dict]:
+        """Parse a CSV JSON cell into a dictionary."""
+        if not isinstance(value, str) or not value.strip():
+            return None
+        try:
+            parsed = json.loads(value)
+        except json.JSONDecodeError:
+            return None
+        return parsed if isinstance(parsed, dict) else None
+
+    def append_csv_row(self, row: Dict, output_csv: str) -> bool:
+        """Append one result row immediately so completed work survives interruption."""
+        try:
+            with open(output_csv, "a", newline="", encoding="utf-8") as csvfile:
+                writer = csv.DictWriter(csvfile, fieldnames=["name", "original", "extracted"])
+                writer.writerow(row)
+                csvfile.flush()
+            return True
+        except Exception as e:
+            print(f"[ERROR] Could not append CSV row to '{output_csv}': {e}")
+            return False
     
     def write_csv(self, rows: List[Dict], output_csv: str) -> bool:
         """Write results to CSV file."""
@@ -256,12 +353,27 @@ class BenchmarkProcessor:
             return False
         
         print(f"Found {len(folders)} valid folders to process")
+
+        if self.config.force and os.path.isfile(self.config.output_csv):
+            os.remove(self.config.output_csv)
+
+        if not self.result_aggregator.initialize_csv(self.config.output_csv):
+            return False
+        processed_names = self.result_aggregator.load_processed_names(self.config.output_csv)
+        if processed_names:
+            print(f"Resuming from existing CSV: {self.config.output_csv} ({len(processed_names)} completed rows)")
         
         # Step 2: Process each folder
         csv_rows = []
         processed_count = 0
         
         for i, folder_info in enumerate(folders, 1):
+            if folder_info.name in processed_names:
+                print(f"[SKIP] {i}/{len(folders)}: '{folder_info.name}' already processed")
+                processed_count += 1
+                csv_rows.append({"name": folder_info.name})
+                continue
+
             success = self._process_single_folder(
                 folder_info, model_config, analyzer_config, csv_rows, i, len(folders)
             )
@@ -272,12 +384,10 @@ class BenchmarkProcessor:
             if i < len(folders):
                 time.sleep(0.5)
         
-        # Step 3: Write CSV results
+        # Step 3: CSV rows were streamed during processing.
         if csv_rows:
-            success = self.result_aggregator.write_csv(csv_rows, self.config.output_csv)
-            if success:
-                print(f"[SUCCESS] Completed. CSV saved to '{self.config.output_csv}'. Processed {processed_count}/{len(folders)} folders.")
-                return True
+            print(f"[SUCCESS] Completed. CSV saved to '{self.config.output_csv}'. Processed {processed_count}/{len(folders)} folders.")
+            return True
         
         print(f"[WARNING] Processing completed but no results to save. Processed {processed_count}/{len(folders)} folders.")
         return False
@@ -330,6 +440,9 @@ class BenchmarkProcessor:
         if csv_row is None:
             return False
         
+        if not self.result_aggregator.append_csv_row(csv_row, self.config.output_csv):
+            return False
+
         csv_rows.append(csv_row)
         duration = time.time() - start_ts
         print(f"[DONE] {current}/{total}: '{folder_info.name}' in {duration:.1f}s\n", flush=True)
@@ -344,9 +457,10 @@ def process_benchmark_floorplans(
     model_name: str,
     json_schema: Optional[Dict] = None,
     open_router_api_key: Optional[str] = None,
-    url: str = "https://openrouter.ai/api/v1/chat/completions",
+    url: Optional[str] = None,
     temperature: float = 0.0,
     analyzer_func: Optional[Callable] = None,
+    force: bool = False,
     **analyzer_kwargs
 ):
     """
@@ -362,8 +476,8 @@ def process_benchmark_floorplans(
     - num_folders: number of folders (in sorted order) to process.
     - model_name: model identifier for analyze_floorplan.
     - json_schema: dict of JSON schema for analyze_floorplan (defaults to PlanElements schema).
-    - open_router_api_key: API key for OpenRouter (if using default analyzer).
-    - url: endpoint URL passed to analyze_floorplan.
+    - open_router_api_key: API key override for the OpenAI-compatible endpoint.
+    - url: base URL override passed to analyze_floorplan.
     - temperature: temperature for analyze_floorplan.
     - analyzer_func: optional custom analyzer function to use instead of default.
     - **analyzer_kwargs: additional keyword arguments to pass to analyzer function.
@@ -373,7 +487,8 @@ def process_benchmark_floorplans(
         benchmark_dir=benchmark_dir,
         output_csv=output_csv,
         output_json_name=output_json_name,
-        num_folders=num_folders
+        num_folders=num_folders,
+        force=force,
     )
     
     model_config = ModelConfig(

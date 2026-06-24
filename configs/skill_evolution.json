@@ -1,0 +1,34 @@
+{
+  "_comment": "Skill-evolution config. This file does not call APIs unless you run generate/evolve without --dry-run and set generator_model.",
+  "skill_evolution": {
+    "output_dir": "results/skill_evolution",
+    "cases_path": "results/skill_evolution/evolution_cases.jsonl",
+    "candidate_library_path": "results/skill_evolution/candidate_skill_library.json",
+    "accepted_library_path": "results/skill_evolution/accepted_skill_library.json",
+    "skill_guided_config_path": "configs/qa_skill_guided_generated.json",
+    "benchmark_config_template": "benchmark_config.json",
+    "qa_images_dir": "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/images",
+    "baseline_eval_csv": "results/qa_llm_judge_results/api_gemini_31_pro_evaluation_results.csv",
+    "candidate_eval_csvs": [
+      "results/qa_llm_judge_results/api_gemini_31_pro_self_refine_evaluation_results.csv",
+      "results/qa_llm_judge_results/api_gemini_31_pro_step_by_step_evaluation_results.csv"
+    ],
+    "object_counting_baseline_csv": "",
+    "object_counting_candidate_csvs": [],
+    "existing_library_path": "",
+    "generator_model": "",
+    "generator_temperature": 0.0,
+    "generator_timeout": 90,
+    "generator_max_retries": 3,
+    "max_cases_per_outcome": 80,
+    "max_skills": 8,
+    "max_skills_per_question": 4,
+    "skill_guided_eval_csv": "",
+    "acceptance": {
+      "min_net_gain": 1,
+      "max_regression_rate": 0.35,
+      "min_support": 1,
+      "require_validation_pass": true
+    }
+  }
+}

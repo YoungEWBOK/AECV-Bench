@@ -1,15 +1,21 @@
 """
-OpenRouter API analyzer for floor plan analysis.
+OpenAI-compatible API analyzer for floor plan analysis.
 """
 import json
 import re
-import requests
-import time
 from typing import Dict, Union, Optional
 from ..utils.image_utils import encode_image_to_base64
 from ..models.plan_elements import get_json_schema
 from .prompts import COUNTING_RULES
 from ..parsers.json_parser import extract_json_from_response
+from ..utils.config import require_llm_api_key, require_llm_base_url
+from ..utils.openai_compatible import chat_completion_content
+from ..utils.prompt_strategies import (
+    build_counting_prompt,
+    build_counting_reflection_prompt,
+    normalize_prompt_strategy,
+)
+from ..skill_evolution.contracts import SkillLibrary
 
 try:
     from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
@@ -20,7 +26,7 @@ except ImportError:
 
 class OpenRouterAnalyzer:
     """
-    Configurable OpenRouter API analyzer that eliminates code duplication.
+    Configurable OpenAI-compatible API analyzer that eliminates code duplication.
     Supports both standard JSON schema enforcement and Claude-style prompt-based extraction.
     """
     
@@ -39,19 +45,11 @@ class OpenRouterAnalyzer:
 
     def _validate_inputs(self, image_path: str, model_name: str, open_router_api_key: Optional[str], json_schema: Optional[Dict]):
         """Validate input parameters."""
-        if open_router_api_key is None:
-            raise ValueError("OpenRouter API key is required")
-        
+        if not model_name:
+            raise ValueError("Model name is required")
         return json_schema or get_json_schema()
 
-    def _prepare_headers(self, open_router_api_key: str) -> Dict[str, str]:
-        """Prepare HTTP headers for the request."""
-        return {
-            "Authorization": f"Bearer {open_router_api_key}",
-            "Content-Type": "application/json"
-        }
-
-    def _build_prompt(self, json_schema: Dict) -> str:
+    def _build_prompt(self, json_schema: Dict, prompt_strategy: str = "one_shot", skill_context: str = "") -> str:
         """Build the prompt text based on configuration."""
         if self.use_schema_format:
             # Standard format - schema enforcement via API
@@ -72,7 +70,7 @@ class OpenRouterAnalyzer:
                 f"{schema_str}\n\n"
             )
         
-        return intro_text + "\n\n" + COUNTING_RULES
+        return build_counting_prompt(intro_text + "\n\n" + COUNTING_RULES, prompt_strategy, skill_context=skill_context)
 
     def _build_payload(self, model_name: str, prompt_text: str, data_url: str, temperature: float, json_schema: Dict) -> Dict:
         """Build the request payload based on configuration."""
@@ -113,53 +111,11 @@ class OpenRouterAnalyzer:
 
         return payload
 
-    def _make_request_with_retry(self, url: str, headers: Dict, payload: Dict, image_path: str) -> Dict:
-        """Make HTTP request with retry logic."""
-        for attempt in range(self.max_retries):
-            try:
-                print(
-                    f"[REQUEST] Sending to OpenRouter (attempt {attempt + 1}/{self.max_retries}, "
-                    f"timeout={self.timeout}s) for '{image_path}' with model '{payload.get('model')}'",
-                    flush=True,
-                )
-                resp = requests.post(url, headers=headers, json=payload, timeout=self.timeout)
-                resp.raise_for_status()
-                return resp.json()
-            except requests.exceptions.HTTPError as e:
-                # For HTTP errors, try to get more details from the response
-                error_msg = f"{e}"
-                try:
-                    if hasattr(e, 'response') and e.response is not None:
-                        error_detail = e.response.json() if e.response.content else {}
-                        error_msg = f"{e}: {error_detail}"
-                except:
-                    pass
-                if attempt < self.max_retries - 1:
-                    wait_time = self.retry_delay * (2 ** attempt)  # Exponential backoff
-                    print(f"[RETRY] Attempt {attempt + 1}/{self.max_retries} failed: {error_msg}. Retrying in {wait_time}s...")
-                    time.sleep(wait_time)
-                else:
-                    raise requests.exceptions.HTTPError(f"{error_msg} for {image_path}") from e
-            except (requests.exceptions.ConnectionError, 
-                    requests.exceptions.Timeout,
-                    requests.exceptions.RequestException) as e:
-                if attempt < self.max_retries - 1:
-                    wait_time = self.retry_delay * (2 ** attempt)  # Exponential backoff
-                    print(f"[RETRY] Attempt {attempt + 1}/{self.max_retries} failed: {type(e).__name__}. Retrying in {wait_time}s...")
-                    time.sleep(wait_time)
-                else:
-                    raise
-
-    def _extract_content_from_response(self, resp_json: Dict, image_path: str) -> str:
-        """Extract content from API response."""
-        try:
-            content = resp_json["choices"][0]["message"]["content"]
-        except (KeyError, IndexError) as e:
-            raise KeyError(f"Unexpected response format: {resp_json}") from e
-        
+    def _validate_content(self, content: str, image_path: str) -> str:
+        """Validate content returned by the API."""
         # Check for empty content
         if not content or (self.use_schema_format and not content.strip()):
-            raise ValueError(f"Empty response from API for {image_path}. Response: {resp_json}")
+            raise ValueError(f"Empty response from API for {image_path}")
         
         return content
 
@@ -197,8 +153,15 @@ class OpenRouterAnalyzer:
         model_name: str,
         json_schema: Dict = None,
         open_router_api_key: str = None,
-        url: str = "https://openrouter.ai/api/v1/chat/completions",
+        url: str = None,
         temperature: float = 0.0,
+        timeout: int = None,
+        max_retries: int = None,
+        retry_delay: int = None,
+        prompt_strategy: str = "one_shot",
+        skill_library_path: str = "",
+        max_skills_per_question: int = 4,
+        skill_statuses=None,
     ) -> Union[str, Dict]:
         """
         Analyze floor plan image using OpenRouter API.
@@ -207,6 +170,19 @@ class OpenRouterAnalyzer:
         """
         # Step 1: Validate inputs
         validated_schema = self._validate_inputs(image_path, model_name, open_router_api_key, json_schema)
+        api_key = open_router_api_key.strip() if open_router_api_key and open_router_api_key.strip() else require_llm_api_key()
+        base_url = url or require_llm_base_url()
+        prompt_strategy = normalize_prompt_strategy(prompt_strategy)
+        skill_context = ""
+        if skill_library_path:
+            skill_library = SkillLibrary.load(skill_library_path)
+            skill_context = skill_library.format_for_prompt(
+                question="Count doors, windows, spaces, bedrooms, and toilets in the full floor plan.",
+                qa_type="object_counting",
+                task="object_counting",
+                max_skills=max_skills_per_question,
+                statuses=skill_statuses or ("accepted",),
+            )
         
         # Step 2: Prepare image
         base64_image = encode_image_to_base64(image_path)
@@ -214,22 +190,55 @@ class OpenRouterAnalyzer:
         mime_type = get_image_mime_type(image_path)
         data_url = f"data:{mime_type};base64,{base64_image}"
         
-        # Step 3: Prepare headers
-        headers = self._prepare_headers(open_router_api_key)
+        # Step 3: Build prompt
+        prompt_text = self._build_prompt(validated_schema, prompt_strategy, skill_context=skill_context)
         
-        # Step 4: Build prompt
-        prompt_text = self._build_prompt(validated_schema)
-        
-        # Step 5: Build payload
+        # Step 4: Build payload
         payload = self._build_payload(model_name, prompt_text, data_url, temperature, validated_schema)
         
-        # Step 6: Make request with retries
-        resp_json = self._make_request_with_retry(url, headers, payload, image_path)
+        # Step 5: Make request with retries
+        content = chat_completion_content(
+            model=payload["model"],
+            messages=payload["messages"],
+            api_key=api_key,
+            base_url=base_url,
+            temperature=payload["temperature"],
+            response_format=payload.get("response_format"),
+            timeout=timeout or self.timeout,
+            max_retries=max_retries or self.max_retries,
+            retry_delay=retry_delay or self.retry_delay,
+            request_label=f"Floor-plan analysis for '{image_path}'",
+        )
+        content = self._validate_content(content, image_path)
+
+        if prompt_strategy == "two_pass_reflection":
+            first_result = self._process_response(content, image_path)
+            reflection_prompt = build_counting_reflection_prompt(
+                self._build_prompt(validated_schema, "one_shot", skill_context=skill_context),
+                first_result,
+            )
+            reflection_payload = self._build_payload(
+                model_name,
+                reflection_prompt,
+                data_url,
+                temperature,
+                validated_schema,
+            )
+            content = chat_completion_content(
+                model=reflection_payload["model"],
+                messages=reflection_payload["messages"],
+                api_key=api_key,
+                base_url=base_url,
+                temperature=reflection_payload["temperature"],
+                response_format=reflection_payload.get("response_format"),
+                timeout=timeout or self.timeout,
+                max_retries=max_retries or self.max_retries,
+                retry_delay=retry_delay or self.retry_delay,
+                request_label=f"Floor-plan reflection for '{image_path}'",
+            )
+            content = self._validate_content(content, image_path)
         
-        # Step 7: Extract content
-        content = self._extract_content_from_response(resp_json, image_path)
-        
-        # Step 8: Process response
+        # Step 6: Process response
         return self._process_response(content, image_path)
 
 
@@ -243,26 +252,32 @@ def analyze_floorplan(
     model_name: str,
     json_schema: Dict = None,
     open_router_api_key: str = None,
-    url: str = "https://openrouter.ai/api/v1/chat/completions",
+    url: str = None,
     temperature: float = 0.0,
+    timeout: int = None,
+    max_retries: int = None,
+    retry_delay: int = None,
+    prompt_strategy: str = "one_shot",
+    skill_library_path: str = "",
+    max_skills_per_question: int = 4,
+    skill_statuses=None,
 ) -> Union[str, Dict]:
     """
-    Sends a floor-plan image to the OpenRouter chat-completions endpoint and returns the JSON response.
+    Sends a floor-plan image to an OpenAI-compatible chat-completions endpoint and returns the JSON response.
 
     Parameters:
     - image_path: Path to the floor-plan image file.
     - model_name: The model identifier to use (e.g., "google/gemini-2.0-flash-001").
     - json_schema: A dict defining the JSON schema expected in the response.
-    - open_router_api_key: Your OpenRouter API key (Bearer token).
-    - url: The endpoint URL (default is OpenRouter chat-completions).
+    - open_router_api_key: API key override. If omitted, OPENAI_API_KEY/API_KEY is used.
+    - url: Base URL override. If omitted, OPENAI_BASE_URL/BASE_URL is used.
     - temperature: Sampling temperature (default 0.0 for deterministic).
 
     Returns:
     - The parsed JSON content from the API response (the "content" field under choices[0].message).
 
     Raises:
-    - requests.HTTPError if the response status is not 2xx.
-    - KeyError if the expected fields are missing in the JSON response.
+    - RuntimeError if the API request fails.
     """
     return _standard_analyzer.analyze_floorplan(
         image_path=image_path,
@@ -270,7 +285,14 @@ def analyze_floorplan(
         json_schema=json_schema,
         open_router_api_key=open_router_api_key,
         url=url,
-        temperature=temperature
+        temperature=temperature,
+        timeout=timeout,
+        max_retries=max_retries,
+        retry_delay=retry_delay,
+        prompt_strategy=prompt_strategy,
+        skill_library_path=skill_library_path,
+        max_skills_per_question=max_skills_per_question,
+        skill_statuses=skill_statuses,
     )
 
 
@@ -279,11 +301,18 @@ def analyze_floorplan_prompt_based(
     model_name: str,
     json_schema: Dict = None,
     open_router_api_key: str = None,
-    url: str = "https://openrouter.ai/api/v1/chat/completions",
+    url: str = None,
     temperature: float = 0.0,
+    timeout: int = None,
+    max_retries: int = None,
+    retry_delay: int = None,
+    prompt_strategy: str = "one_shot",
+    skill_library_path: str = "",
+    max_skills_per_question: int = 4,
+    skill_statuses=None,
 ) -> Union[str, Dict]:
     """
-    Sends a floor-plan image to the OpenRouter chat-completions endpoint.
+    Sends a floor-plan image to an OpenAI-compatible chat-completions endpoint.
     Uses prompt-based JSON extraction instead of strict schema enforcement.
 
     Use this for models that don't support structured output via response_format.
@@ -292,16 +321,15 @@ def analyze_floorplan_prompt_based(
     - image_path: Path to the floor-plan image file.
     - model_name: The model identifier to use.
     - json_schema: A dict defining the JSON schema expected in the response.
-    - open_router_api_key: Your OpenRouter API key (Bearer token).
-    - url: The endpoint URL (default is OpenRouter chat-completions).
+    - open_router_api_key: API key override. If omitted, OPENAI_API_KEY/API_KEY is used.
+    - url: Base URL override. If omitted, OPENAI_BASE_URL/BASE_URL is used.
     - temperature: Sampling temperature (default 0.0 for deterministic).
 
     Returns:
     - The parsed JSON content from the API response.
 
     Raises:
-    - requests.HTTPError if the response status is not 2xx.
-    - KeyError if the expected fields are missing in the JSON response.
+    - RuntimeError if the API request fails.
     """
     return _prompt_based_analyzer.analyze_floorplan(
         image_path=image_path,
@@ -309,6 +337,13 @@ def analyze_floorplan_prompt_based(
         json_schema=json_schema,
         open_router_api_key=open_router_api_key,
         url=url,
-        temperature=temperature
+        temperature=temperature,
+        timeout=timeout,
+        max_retries=max_retries,
+        retry_delay=retry_delay,
+        prompt_strategy=prompt_strategy,
+        skill_library_path=skill_library_path,
+        max_skills_per_question=max_skills_per_question,
+        skill_statuses=skill_statuses,
     )
 

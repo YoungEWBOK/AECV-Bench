@@ -40,3 +40,14 @@ Thumbs.db
 # Project specific
 AI_res/
 
+# Local benchmark/runtime outputs
+.omx/
+api_usage.txt
+benchmark_result_qa/
+benchmark_result_object_counting/
+results/
+reports/
+hermes-agent-self-evolution/
+data/**/openai_gpt_*.json
+configs/qa_skill_guided_generated.json
+

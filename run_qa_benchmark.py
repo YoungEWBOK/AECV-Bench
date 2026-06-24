@@ -10,22 +10,37 @@ import json
 import os
 import csv
 import time
+import argparse
 from pathlib import Path
-from src.analyzers.openrouter import analyze_floorplan
 from src.utils.image_utils import encode_image_to_base64
-from src.utils.config import require_api_key
-import requests
+from src.utils.config import require_llm_api_key, require_llm_base_url
+from src.utils.benchmark_config import (
+    DEFAULT_CONFIG_PATH,
+    get_enabled_models,
+    get_required_value,
+    get_section,
+    load_benchmark_config,
+)
+from src.utils.openai_compatible import chat_completion_content
+from src.utils.prompt_strategies import (
+    build_qa_prompt,
+    build_qa_reflection_prompt,
+    make_safe_name,
+    normalize_prompt_strategy,
+    prompt_strategy_suffix,
+)
+from src.skill_evolution.contracts import SkillLibrary
 
-# API keys from environment variables
-open_router_api_key = require_api_key('OPEN_ROUTER_API_KEY', 'OpenRouter')
-cohere_api_key = require_api_key('COHERE_API_KEY', 'Cohere')
+# Single OpenAI-compatible API configuration
+llm_api_key = require_llm_api_key()
+llm_base_url = require_llm_base_url()
 
 # Configuration
 images_dir = "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/images"
 labels_dir = "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/labels"
 output_dir = "benchmark_result_qa"
 os.makedirs(output_dir, exist_ok=True)
-url = "https://openrouter.ai/api/v1/chat/completions"
+url = llm_base_url
 temperature = 0.0
 
 # Model configurations - based on run_all_models_benchmark.py
@@ -135,7 +150,20 @@ models = [
 ]
 
 
-def ask_question_with_image(image_path: str, question: str, model_name: str, open_router_api_key: str, url: str, temperature: float = 0.0) -> str:
+def ask_question_with_image(
+    image_path: str,
+    question: str,
+    model_name: str,
+    open_router_api_key: str,
+    url: str,
+    temperature: float = 0.0,
+    prompt_strategy: str = "one_shot",
+    skill_library: SkillLibrary = None,
+    qa_type: str = "",
+    task: str = "",
+    max_skills_per_question: int = 4,
+    skill_statuses=None,
+) -> str:
     """
     Send a question with an image to the model and get the answer.
     
@@ -143,8 +171,8 @@ def ask_question_with_image(image_path: str, question: str, model_name: str, ope
         image_path: Path to the image file
         question: The question to ask
         model_name: Model identifier
-        open_router_api_key: API key
-        url: API endpoint URL
+        open_router_api_key: API key override
+        url: OpenAI-compatible base URL
         temperature: Sampling temperature
         
     Returns:
@@ -156,122 +184,19 @@ def ask_question_with_image(image_path: str, question: str, model_name: str, ope
     mime_type = get_image_mime_type(image_path)
     data_url = f"data:{mime_type};base64,{base64_image}"
 
-    # Prepare headers
-    headers = {
-        "Authorization": f"Bearer {open_router_api_key}",
-        "Content-Type": "application/json"
-    }
-    
-    # Build the message payload with instruction for short, precise answers
-    prompt_text = f"Please analyze the engineering/architectural drawing attached and provide a short and precise answer to the following question. Avoid extended explanations.\n\n{question}"
-    
-    messages = [
-        {
-            "role": "user",
-            "content": [
-                {
-                    "type": "text",
-                    "text": prompt_text
-                },
-                {
-                    "type": "image_url",
-                    "image_url": {
-                        "url": data_url
-                    }
-                }
-            ]
-        }
-    ]
-    
-    payload = {
-        "model": model_name,
-        "messages": messages,
-        "temperature": temperature
-    }
-    
-    # Retry logic for network errors
-    max_retries = 3
-    retry_delay = 2
-    
-    for attempt in range(max_retries):
-        try:
-            resp = requests.post(url, headers=headers, json=payload, timeout=60)
-            resp.raise_for_status()
-            break
-        except requests.exceptions.HTTPError as e:
-            # For HTTP errors, try to get more details from the response
-            error_msg = f"{e}"
-            try:
-                if hasattr(e, 'response') and e.response is not None:
-                    error_detail = e.response.json() if e.response.content else {}
-                    error_msg = f"{e}: {error_detail}"
-                    print(f"[API ERROR] {error_msg}")
-            except:
-                try:
-                    if hasattr(e, 'response') and e.response is not None:
-                        print(f"[API ERROR] {e.response.text[:500]}")
-                except:
-                    pass
-            if attempt < max_retries - 1:
-                wait_time = retry_delay * (2 ** attempt)
-                print(f"[RETRY] Attempt {attempt + 1}/{max_retries} failed: {type(e).__name__}. Retrying in {wait_time}s...")
-                time.sleep(wait_time)
-            else:
-                raise requests.exceptions.HTTPError(f"{error_msg} for {image_path}") from e
-        except (requests.exceptions.ConnectionError, 
-                requests.exceptions.Timeout,
-                requests.exceptions.RequestException) as e:
-            if attempt < max_retries - 1:
-                wait_time = retry_delay * (2 ** attempt)
-                print(f"[RETRY] Attempt {attempt + 1}/{max_retries} failed: {type(e).__name__}. Retrying in {wait_time}s...")
-                time.sleep(wait_time)
-            else:
-                raise
-    
-    resp_json = resp.json()
-    try:
-        content = resp_json["choices"][0]["message"]["content"]
-    except (KeyError, IndexError) as e:
-        raise KeyError(f"Unexpected response format: {resp_json}") from e
-    
-    return content
+    prompt_strategy = normalize_prompt_strategy(prompt_strategy)
+    skill_context = ""
+    if skill_library is not None:
+        skill_context = skill_library.format_for_prompt(
+            question=question,
+            qa_type=qa_type,
+            task=task,
+            max_skills=max_skills_per_question,
+            statuses=skill_statuses or ("accepted",),
+        )
 
-
-def ask_question_with_image_cohere(image_path: str, question: str, model_name: str, cohere_api_key: str, url: str = "https://api.cohere.com/v2/chat", temperature: float = 0.0) -> str:
-    """
-    Send a question with an image to Cohere model and get the answer.
-    Based on the existing cohere.py analyzer structure.
-    
-    Args:
-        image_path: Path to the image file
-        question: The question to ask
-        model_name: Model identifier
-        cohere_api_key: Cohere API key
-        url: Cohere API endpoint URL
-        temperature: Sampling temperature
-        
-    Returns:
-        The model's answer as a string
-    """
-    if not cohere_api_key:
-        raise ValueError("Cohere API key is required")
-    
-    # Read and encode image
-    base64_image = encode_image_to_base64(image_path)
-    
-    # Prepare headers
-    headers = {
-        'accept': 'application/json',
-        'content-type': 'application/json',
-        'Authorization': f'bearer {cohere_api_key}'
-    }
-    
-    # Build the message payload with instruction for short, precise answers
-    prompt_text = f"Please analyze the engineering/architectural drawing attached and provide a short and precise answer to the following question. Avoid extended explanations.\n\n{question}"
-    
-    payload = {
-        "model": model_name,
-        "messages": [
+    def build_messages(prompt_text: str):
+        return [
             {
                 "role": "user",
                 "content": [
@@ -282,80 +207,74 @@ def ask_question_with_image_cohere(image_path: str, question: str, model_name: s
                     {
                         "type": "image_url",
                         "image_url": {
-                            "url": f"data:{get_image_mime_type(image_path)};base64,{base64_image}"
+                            "url": data_url
                         }
                     }
                 ]
             }
-        ],
-        "temperature": temperature,
-        "max_tokens": 2000
-    }
-    
-    # Retry logic for network errors
-    max_retries = 3
-    retry_delay = 2
-    
-    for attempt in range(max_retries):
-        try:
-            resp = requests.post(url, headers=headers, json=payload, timeout=60)
-            resp.raise_for_status()
-            break
-        except requests.exceptions.HTTPError as e:
-            error_msg = f"{e}"
-            try:
-                if hasattr(e, 'response') and e.response is not None:
-                    error_detail = e.response.json() if e.response.content else {}
-                    error_msg = f"{e}: {error_detail}"
-                    print(f"[API ERROR] {error_msg}")
-            except:
-                try:
-                    if hasattr(e, 'response') and e.response is not None:
-                        print(f"[API ERROR] {e.response.text[:500]}")
-                except:
-                    pass
-            if attempt < max_retries - 1:
-                wait_time = retry_delay * (2 ** attempt)
-                print(f"[RETRY] Attempt {attempt + 1}/{max_retries} failed: {type(e).__name__}. Retrying in {wait_time}s...")
-                time.sleep(wait_time)
-            else:
-                raise requests.exceptions.HTTPError(f"{error_msg} for {image_path}") from e
-        except (requests.exceptions.ConnectionError, 
-                requests.exceptions.Timeout,
-                requests.exceptions.RequestException) as e:
-            if attempt < max_retries - 1:
-                wait_time = retry_delay * (2 ** attempt)
-                print(f"[RETRY] Attempt {attempt + 1}/{max_retries} failed: {type(e).__name__}. Retrying in {wait_time}s...")
-                time.sleep(wait_time)
-            else:
-                raise
-    
-    resp_json = resp.json()
-    
-    # Handle Cohere v2 API response structure (similar to cohere.py)
-    content = ""
-    try:
-        # Try different v2 response structures
-        if 'message' in resp_json:
-            if 'content' in resp_json['message']:
-                if isinstance(resp_json['message']['content'], list):
-                    content = resp_json['message']['content'][0].get('text', '')
-                else:
-                    content = resp_json['message']['content']
-        elif 'text' in resp_json:
-            content = resp_json['text']
-        elif 'choices' in resp_json:
-            content = resp_json['choices'][0]['message']['content']
-        else:
-            content = str(resp_json)
-    except (KeyError, IndexError, TypeError) as e:
-        print(f"Error extracting content: {e}")
-        content = str(resp_json)
-    
-    return content
+        ]
+
+    first_answer = chat_completion_content(
+        model=model_name,
+        messages=build_messages(build_qa_prompt(question, prompt_strategy, skill_context=skill_context)),
+        api_key=open_router_api_key,
+        base_url=url,
+        temperature=temperature,
+        timeout=60,
+        max_retries=3,
+        request_label=f"QA image question for '{image_path}'",
+    )
+
+    if prompt_strategy != "two_pass_reflection":
+        return first_answer
+
+    return chat_completion_content(
+        model=model_name,
+        messages=build_messages(build_qa_reflection_prompt(question, first_answer)),
+        api_key=open_router_api_key,
+        base_url=url,
+        temperature=temperature,
+        timeout=60,
+        max_retries=3,
+        request_label=f"QA reflection for '{image_path}'",
+    )
+
+def ask_question_with_image_cohere(
+    image_path: str,
+    question: str,
+    model_name: str,
+    cohere_api_key: str,
+    url: str = None,
+    temperature: float = 0.0,
+    prompt_strategy: str = "one_shot",
+    skill_library: SkillLibrary = None,
+    qa_type: str = "",
+    task: str = "",
+    max_skills_per_question: int = 4,
+    skill_statuses=None,
+) -> str:
+    """
+    Backward-compatible wrapper for older Cohere-configured models.
+
+    All LLM calls now use the configured OpenAI-compatible API key and base URL.
+    """
+    return ask_question_with_image(
+        image_path=image_path,
+        question=question,
+        model_name=model_name,
+        open_router_api_key=cohere_api_key,
+        url=url or llm_base_url,
+        temperature=temperature,
+        prompt_strategy=prompt_strategy,
+        skill_library=skill_library,
+        qa_type=qa_type,
+        task=task,
+        max_skills_per_question=max_skills_per_question,
+        skill_statuses=skill_statuses,
+    )
 
 
-def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, model_name: str, open_router_api_key: str, url: str, temperature: float = 0.0, use_cohere_api: bool = False, cohere_api_key: str = None):
+def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, model_name: str, open_router_api_key: str, url: str, temperature: float = 0.0, use_cohere_api: bool = False, cohere_api_key: str = None, prompt_strategy: str = "one_shot", skill_library_path: str = "", max_skills_per_question: int = 4, skill_statuses=None):
     """
     Process QA pairs from label files and save results.
     
@@ -364,26 +283,85 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
         images_dir: Directory containing image files
         output_csv: Path to output CSV file
         model_name: Model identifier
-        open_router_api_key: OpenRouter API key (if not using Cohere)
-        url: OpenRouter API endpoint URL (if not using Cohere)
+        open_router_api_key: API key override
+        url: OpenAI-compatible base URL
         temperature: Sampling temperature
-        use_cohere_api: If True, use Cohere API instead of OpenRouter
-        cohere_api_key: Cohere API key (required if use_cohere_api is True)
+        use_cohere_api: Backward-compatible flag; still uses the OpenAI-compatible endpoint
+        cohere_api_key: API key override for backward-compatible Cohere configs
+        prompt_strategy: Prompt strategy for this run
     """
+    prompt_strategy = normalize_prompt_strategy(prompt_strategy)
+    skill_library = None
+    if skill_library_path:
+        skill_library = SkillLibrary.load(skill_library_path)
+        accepted_count = len([skill for skill in skill_library.skills if skill.status == "accepted"])
+        candidate_count = len([skill for skill in skill_library.skills if skill.status == "candidate"])
+        print(
+            f"Skill library: {skill_library_path} "
+            f"({accepted_count} accepted, {candidate_count} candidate; "
+            f"statuses={skill_statuses or ('accepted',)}; max {max_skills_per_question}/question)"
+        )
     # Get all label files
     label_files = sorted(Path(labels_dir).glob("*.json"))
     
     if not label_files:
         print(f"Error: No label files found in {labels_dir}")
         return
+
+    output_parent = os.path.dirname(output_csv)
+    if output_parent:
+        os.makedirs(output_parent, exist_ok=True)
     
     print(f"Found {len(label_files)} label files")
     print(f"Model: {model_name}")
+    print(f"Prompt strategy: {prompt_strategy}")
     print(f"Processing QA pairs...\n")
     
     results = []
     total_questions = 0
     processed_questions = 0
+    fieldnames = ["image_id", "qa_id", "qa_type", "task", "question", "ground_truth", "model_answer"]
+    processed_keys = set()
+
+    def result_key(image_id: str, qa_id: str, qa_type: str):
+        return (image_id, qa_id, qa_type)
+
+    def record_result(result: dict):
+        """Keep in-memory summary and stream each completed QA result to disk."""
+        results.append(result)
+        processed_keys.add(result_key(result["image_id"], result["qa_id"], result["qa_type"]))
+        with open(output_csv, 'a', newline='', encoding='utf-8') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writerow(result)
+            csvfile.flush()
+
+    if os.path.isfile(output_csv):
+        completed_rows = []
+        failed_rows = 0
+        with open(output_csv, 'r', newline='', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                if row.get("image_id") and row.get("qa_id") and row.get("qa_type"):
+                    if row.get("model_answer", "").startswith("[ERROR:"):
+                        failed_rows += 1
+                        continue
+                    results.append(row)
+                    completed_rows.append(row)
+                    processed_keys.add(result_key(row["image_id"], row["qa_id"], row["qa_type"]))
+
+        with open(output_csv, 'w', newline='', encoding='utf-8') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+            for row in completed_rows:
+                writer.writerow(row)
+
+        print(f"Resuming from existing CSV: {output_csv} ({len(processed_keys)} completed rows)")
+        if failed_rows:
+            print(f"  Retrying {failed_rows} previous failed row(s)")
+    else:
+        with open(output_csv, 'w', newline='', encoding='utf-8') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
     
     for label_file in label_files:
         try:
@@ -431,6 +409,12 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
             
             if not question:
                 continue
+
+            key = result_key(image_id, qa_id, "qa_pairs")
+            if key in processed_keys:
+                processed_questions += 1
+                print(f"Skipping already processed {qa_id}")
+                continue
             
             try:
                 print(f"Processing {qa_id}: {question[:60]}...")
@@ -440,7 +424,13 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
                         question=question,
                         model_name=model_name,
                         cohere_api_key=cohere_api_key,
-                        temperature=temperature
+                        temperature=temperature,
+                        prompt_strategy=prompt_strategy,
+                        skill_library=skill_library,
+                        qa_type="qa_pairs",
+                        task=task,
+                        max_skills_per_question=max_skills_per_question,
+                        skill_statuses=skill_statuses,
                     )
                 else:
                     model_answer = ask_question_with_image(
@@ -449,10 +439,16 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
                         model_name=model_name,
                         open_router_api_key=open_router_api_key,
                         url=url,
-                        temperature=temperature
+                        temperature=temperature,
+                        prompt_strategy=prompt_strategy,
+                        skill_library=skill_library,
+                        qa_type="qa_pairs",
+                        task=task,
+                        max_skills_per_question=max_skills_per_question,
+                        skill_statuses=skill_statuses,
                     )
                 
-                results.append({
+                record_result({
                     "image_id": image_id,
                     "qa_id": qa_id,
                     "qa_type": "qa_pairs",
@@ -469,7 +465,7 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
                 
             except Exception as e:
                 print(f"[ERROR] Failed to process {qa_id}: {e}")
-                results.append({
+                record_result({
                     "image_id": image_id,
                     "qa_id": qa_id,
                     "qa_type": "qa_pairs",
@@ -493,6 +489,12 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
             
             if not question:
                 continue
+
+            key = result_key(image_id, qa_id, "ocr_qa")
+            if key in processed_keys:
+                processed_questions += 1
+                print(f"Skipping already processed {qa_id}")
+                continue
             
             try:
                 print(f"Processing {qa_id}: {question[:60]}...")
@@ -502,7 +504,13 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
                         question=question,
                         model_name=model_name,
                         cohere_api_key=cohere_api_key,
-                        temperature=temperature
+                        temperature=temperature,
+                        prompt_strategy=prompt_strategy,
+                        skill_library=skill_library,
+                        qa_type="ocr_qa",
+                        task=task,
+                        max_skills_per_question=max_skills_per_question,
+                        skill_statuses=skill_statuses,
                     )
                 else:
                     model_answer = ask_question_with_image(
@@ -511,10 +519,16 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
                         model_name=model_name,
                         open_router_api_key=open_router_api_key,
                         url=url,
-                        temperature=temperature
+                        temperature=temperature,
+                        prompt_strategy=prompt_strategy,
+                        skill_library=skill_library,
+                        qa_type="ocr_qa",
+                        task=task,
+                        max_skills_per_question=max_skills_per_question,
+                        skill_statuses=skill_statuses,
                     )
                 
-                results.append({
+                record_result({
                     "image_id": image_id,
                     "qa_id": qa_id,
                     "qa_type": "ocr_qa",
@@ -530,7 +544,7 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
                 
             except Exception as e:
                 print(f"[ERROR] Failed to process {qa_id}: {e}")
-                results.append({
+                record_result({
                     "image_id": image_id,
                     "qa_id": qa_id,
                     "qa_type": "ocr_qa",
@@ -554,6 +568,12 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
             
             if not question:
                 continue
+
+            key = result_key(image_id, qa_id, "spatial_qa")
+            if key in processed_keys:
+                processed_questions += 1
+                print(f"Skipping already processed {qa_id}")
+                continue
             
             try:
                 print(f"Processing {qa_id}: {question[:60]}...")
@@ -563,7 +583,13 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
                         question=question,
                         model_name=model_name,
                         cohere_api_key=cohere_api_key,
-                        temperature=temperature
+                        temperature=temperature,
+                        prompt_strategy=prompt_strategy,
+                        skill_library=skill_library,
+                        qa_type="spatial_qa",
+                        task=task,
+                        max_skills_per_question=max_skills_per_question,
+                        skill_statuses=skill_statuses,
                     )
                 else:
                     model_answer = ask_question_with_image(
@@ -572,10 +598,16 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
                         model_name=model_name,
                         open_router_api_key=open_router_api_key,
                         url=url,
-                        temperature=temperature
+                        temperature=temperature,
+                        prompt_strategy=prompt_strategy,
+                        skill_library=skill_library,
+                        qa_type="spatial_qa",
+                        task=task,
+                        max_skills_per_question=max_skills_per_question,
+                        skill_statuses=skill_statuses,
                     )
                 
-                results.append({
+                record_result({
                     "image_id": image_id,
                     "qa_id": qa_id,
                     "qa_type": "spatial_qa",
@@ -591,7 +623,7 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
                 
             except Exception as e:
                 print(f"[ERROR] Failed to process {qa_id}: {e}")
-                results.append({
+                record_result({
                     "image_id": image_id,
                     "qa_id": qa_id,
                     "qa_type": "spatial_qa",
@@ -616,6 +648,12 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
             if not question:
                 continue
 
+            key = result_key(image_id, qa_id, "counting_qa")
+            if key in processed_keys:
+                processed_questions += 1
+                print(f"Skipping already processed {qa_id}")
+                continue
+
             try:
                 print(f"Processing {qa_id}: {question[:60]}...")
                 if use_cohere_api:
@@ -624,7 +662,13 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
                         question=question,
                         model_name=model_name,
                         cohere_api_key=cohere_api_key,
-                        temperature=temperature
+                        temperature=temperature,
+                        prompt_strategy=prompt_strategy,
+                        skill_library=skill_library,
+                        qa_type="counting_qa",
+                        task=task,
+                        max_skills_per_question=max_skills_per_question,
+                        skill_statuses=skill_statuses,
                     )
                 else:
                     model_answer = ask_question_with_image(
@@ -633,10 +677,16 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
                         model_name=model_name,
                         open_router_api_key=open_router_api_key,
                         url=url,
-                        temperature=temperature
+                        temperature=temperature,
+                        prompt_strategy=prompt_strategy,
+                        skill_library=skill_library,
+                        qa_type="counting_qa",
+                        task=task,
+                        max_skills_per_question=max_skills_per_question,
+                        skill_statuses=skill_statuses,
                     )
 
-                results.append({
+                record_result({
                     "image_id": image_id,
                     "qa_id": qa_id,
                     "qa_type": "counting_qa",
@@ -652,7 +702,7 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
 
             except Exception as e:
                 print(f"[ERROR] Failed to process {qa_id}: {e}")
-                results.append({
+                record_result({
                     "image_id": image_id,
                     "qa_id": qa_id,
                     "qa_type": "counting_qa",
@@ -677,6 +727,12 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
             if not question:
                 continue
 
+            key = result_key(image_id, qa_id, "comparison_qa")
+            if key in processed_keys:
+                processed_questions += 1
+                print(f"Skipping already processed {qa_id}")
+                continue
+
             try:
                 print(f"Processing {qa_id}: {question[:60]}...")
                 if use_cohere_api:
@@ -685,7 +741,13 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
                         question=question,
                         model_name=model_name,
                         cohere_api_key=cohere_api_key,
-                        temperature=temperature
+                        temperature=temperature,
+                        prompt_strategy=prompt_strategy,
+                        skill_library=skill_library,
+                        qa_type="comparison_qa",
+                        task=task,
+                        max_skills_per_question=max_skills_per_question,
+                        skill_statuses=skill_statuses,
                     )
                 else:
                     model_answer = ask_question_with_image(
@@ -694,10 +756,16 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
                         model_name=model_name,
                         open_router_api_key=open_router_api_key,
                         url=url,
-                        temperature=temperature
+                        temperature=temperature,
+                        prompt_strategy=prompt_strategy,
+                        skill_library=skill_library,
+                        qa_type="comparison_qa",
+                        task=task,
+                        max_skills_per_question=max_skills_per_question,
+                        skill_statuses=skill_statuses,
                     )
 
-                results.append({
+                record_result({
                     "image_id": image_id,
                     "qa_id": qa_id,
                     "qa_type": "comparison_qa",
@@ -713,7 +781,7 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
 
             except Exception as e:
                 print(f"[ERROR] Failed to process {qa_id}: {e}")
-                results.append({
+                record_result({
                     "image_id": image_id,
                     "qa_id": qa_id,
                     "qa_type": "comparison_qa",
@@ -723,15 +791,8 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
                     "model_answer": f"[ERROR: {str(e)}]"
                 })
 
-    # Save results to CSV
+    # Results are streamed to CSV as each question completes.
     if results:
-        with open(output_csv, 'w', newline='', encoding='utf-8') as csvfile:
-            fieldnames = ["image_id", "qa_id", "qa_type", "task", "question", "ground_truth", "model_answer"]
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writeheader()
-            for result in results:
-                writer.writerow(result)
-        
         print(f"\n[SUCCESS] Results saved to {output_csv}")
         print(f"Total questions processed: {processed_questions}/{total_questions}")
     else:
@@ -739,6 +800,29 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run QA benchmark")
+    parser.add_argument(
+        "--config",
+        type=str,
+        default=DEFAULT_CONFIG_PATH,
+        help=f"Benchmark config JSON path (default: {DEFAULT_CONFIG_PATH})",
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite existing QA result CSVs and rerun all questions for enabled models.",
+    )
+    args = parser.parse_args()
+
+    config = load_benchmark_config(args.config)
+    qa_config = get_section(config, "qa")
+    images_dir = get_required_value(qa_config, "images_dir", "qa")
+    labels_dir = get_required_value(qa_config, "labels_dir", "qa")
+    output_dir = get_required_value(qa_config, "output_dir", "qa")
+    models = get_enabled_models(qa_config, "qa")
+    os.makedirs(output_dir, exist_ok=True)
+    force = args.force or bool(qa_config.get("force", False))
+
     print("="*60)
     print("QA BENCHMARK - Testing Question/Answer Pairs")
     print("="*60)
@@ -752,38 +836,61 @@ if __name__ == "__main__":
     for i, model_config in enumerate(models, 1):
         model_name = model_config["name"]
         model_id = model_config["model_id"]
+        prompt_strategy = normalize_prompt_strategy(model_config.get("prompt_strategy", qa_config.get("prompt_strategy", "one_shot")))
+        skill_library_path = model_config.get("skill_library_path", qa_config.get("skill_library_path", ""))
+        max_skills_per_question = int(model_config.get("max_skills_per_question", qa_config.get("max_skills_per_question", 4)))
+        skill_statuses = model_config.get("skill_statuses", qa_config.get("skill_statuses", ["accepted"]))
+        if isinstance(skill_statuses, str):
+            skill_statuses = [item.strip() for item in skill_statuses.split(",") if item.strip()]
         
         # Create output filename
-        safe_name = model_name.lower().replace(" ", "_").replace(".", "").replace("-", "_")
+        safe_name = make_safe_name(model_name)
+        strategy_suffix = prompt_strategy_suffix(prompt_strategy)
+        display_name = model_name
+        if strategy_suffix:
+            safe_name = f"{safe_name}_{strategy_suffix}"
+            display_name = f"{model_name} ({prompt_strategy})"
         output_csv = os.path.join(output_dir, f"qa_results_{safe_name}.csv")
+        if force and os.path.isfile(output_csv):
+            os.remove(output_csv)
         
         print(f"\n[{i}/{len(models)}] Processing: {model_name}")
         print(f"  Model ID: {model_id}")
+        print(f"  Prompt strategy: {prompt_strategy}")
+        if skill_library_path:
+            print(
+                f"  Skill library: {skill_library_path} "
+                f"(statuses={skill_statuses}, max {max_skills_per_question}/question)"
+            )
         if "note" in model_config:
             print(f"  Note: {model_config['note']}")
         print(f"  Output: {output_csv}")
         print("-" * 60)
         
         try:
-            # Check if this is a Cohere model
+            # Backward-compatible handling for older Cohere-configured entries.
             use_cohere = model_config.get("use_cohere_api", False)
             cohere_key = None
             if use_cohere:
-                cohere_key = cohere_api_key
+                cohere_key = llm_api_key
             
             process_qa_benchmark(
                 labels_dir=labels_dir,
                 images_dir=images_dir,
                 output_csv=output_csv,
                 model_name=model_id,
-                open_router_api_key=open_router_api_key,
+                open_router_api_key=llm_api_key,
                 url=url,
                 temperature=temperature,
                 use_cohere_api=use_cohere,
-                cohere_api_key=cohere_key
+                cohere_api_key=cohere_key,
+                prompt_strategy=prompt_strategy,
+                skill_library_path=skill_library_path,
+                max_skills_per_question=max_skills_per_question,
+                skill_statuses=skill_statuses,
             )
             results_summary.append({
-                "name": model_name,
+                "name": display_name,
                 "csv": output_csv,
                 "status": "success"
             })
@@ -791,7 +898,7 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"[ERROR] {model_name} failed: {e}")
             results_summary.append({
-                "name": model_name,
+                "name": display_name,
                 "csv": output_csv,
                 "status": "failed",
                 "error": str(e)
