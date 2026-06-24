@@ -24,8 +24,6 @@ class QAEvaluator:
         url: str = None,
         temperature: float = 0.0,
         extra_body: Optional[Dict] = None,
-        stream: bool = False,
-        stream_options: Optional[Dict] = None,
     ):
         """
         Initialize the QA evaluator.
@@ -40,8 +38,6 @@ class QAEvaluator:
         self.base_url = url or require_llm_base_url()
         self.temperature = temperature
         self.extra_body = extra_body
-        self.stream = stream
-        self.stream_options = stream_options
         
         # Get API key
         if open_router_api_key is None or not open_router_api_key.strip():
@@ -98,8 +94,6 @@ Your response (just the number, nothing else):"""
                 base_url=self.base_url,
                 temperature=self.temperature,
                 extra_body=self.extra_body,
-                stream=self.stream,
-                stream_options=self.stream_options,
                 timeout=60,
                 max_retries=3,
                 request_label="QA judge evaluation",

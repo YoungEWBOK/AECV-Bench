@@ -331,8 +331,6 @@ def run_prediction_split(
         max_skills_per_question=int(config.get("max_skills_per_question", 4)),
         skill_statuses=list(library_statuses),
         extra_body=model.get("extra_body"),
-        stream=bool(model.get("stream", False)),
-        stream_options=model.get("stream_options"),
     )
 
 
@@ -345,8 +343,6 @@ def evaluate_prediction_csv(config: Dict[str, Any], prediction_csv: str, output_
         url=require_llm_base_url(),
         temperature=float(judge.get("temperature", 0.0)),
         extra_body=judge.get("extra_body"),
-        stream=bool(judge.get("stream", False)),
-        stream_options=judge.get("stream_options"),
     )
     return evaluator.evaluate_csv(prediction_csv, output_csv=output_csv, force=bool(config.get("force", False)))
 
@@ -420,8 +416,6 @@ def generate_candidate_library(
         timeout=int(config.get("generator_timeout", 90)),
         max_retries=int(config.get("generator_max_retries", 3)),
         extra_body=config.get("generator_extra_body", config.get("model", {}).get("extra_body")),
-        stream=bool(config.get("generator_stream", config.get("model", {}).get("stream", False))),
-        stream_options=config.get("generator_stream_options", config.get("model", {}).get("stream_options")),
     )
     library = generator.generate(
         cases,

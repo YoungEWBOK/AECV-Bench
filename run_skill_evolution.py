@@ -185,8 +185,6 @@ def generate_candidates_from_config(
         timeout=int(config.get("generator_timeout", 90)),
         max_retries=int(config.get("generator_max_retries", 3)),
         extra_body=config.get("generator_extra_body"),
-        stream=bool(config.get("generator_stream", False)),
-        stream_options=config.get("generator_stream_options"),
     )
     library = generator.generate(
         cases,

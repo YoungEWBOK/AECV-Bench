@@ -48,24 +48,6 @@ def _message_content_to_text(content: Any) -> str:
     return str(content)
 
 
-def _collect_chat_stream_text(response: Any) -> str:
-    """Collect final assistant content from a streamed chat-completions response."""
-    text_parts = []
-    for chunk in response:
-        choices = getattr(chunk, "choices", None)
-        if not choices:
-            # Some providers send a final usage-only chunk when stream_options
-            # includes usage. It has no assistant text.
-            continue
-        delta = getattr(choices[0], "delta", None)
-        if delta is None:
-            continue
-        content = getattr(delta, "content", None)
-        if content:
-            text_parts.append(str(content))
-    return "".join(text_parts).strip()
-
-
 def _chat_content_to_responses_content(content: Any) -> Any:
     """Convert chat-completions content blocks to Responses API content blocks."""
     if isinstance(content, str):
@@ -260,8 +242,6 @@ def chat_completion_content(
     response_format: Optional[Dict[str, Any]] = None,
     max_tokens: Optional[int] = None,
     extra_body: Optional[Dict[str, Any]] = None,
-    stream: bool = False,
-    stream_options: Optional[Dict[str, Any]] = None,
     timeout: int = 60,
     max_retries: int = 3,
     retry_delay: int = 2,
@@ -289,10 +269,6 @@ def chat_completion_content(
             payload["max_tokens"] = max_tokens
         if extra_body:
             payload["extra_body"] = extra_body
-        if stream:
-            payload["stream"] = True
-            if stream_options:
-                payload["stream_options"] = stream_options
 
     last_error = None
     for attempt in range(max_retries):
@@ -316,10 +292,7 @@ def chat_completion_content(
                 )
             else:
                 response = client.chat.completions.create(**payload)
-                if stream:
-                    content = _collect_chat_stream_text(response)
-                else:
-                    content = _message_content_to_text(response.choices[0].message.content)
+                content = _message_content_to_text(response.choices[0].message.content)
 
             if content:
                 return content
