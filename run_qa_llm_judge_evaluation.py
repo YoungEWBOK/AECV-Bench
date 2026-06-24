@@ -635,6 +635,7 @@ def main():
     args.input_dir = args.input_dir or judge_config.get("input_dir", "benchmark_result_qa")
     args.output_dir = args.output_dir or judge_config.get("output_dir", "results/qa_llm_judge_results")
     args.judge_model = args.judge_model or judge_config.get("model_id", "openai/gpt-4o")
+    judge_extra_body = judge_config.get("extra_body")
     if not args.csv_files and judge_config.get("csv_files"):
         args.csv_files = judge_config["csv_files"]
     force = args.force or bool(judge_config.get("force", False))
@@ -718,7 +719,8 @@ def main():
         print(f"Using judge model: {args.judge_model}")
         evaluator = QAEvaluator(
             judge_model=args.judge_model,
-            open_router_api_key=LLM_API_KEY
+            open_router_api_key=LLM_API_KEY,
+            extra_body=judge_extra_body,
         )
         
         # Evaluate each new model
@@ -756,7 +758,8 @@ def main():
         print(f"Using judge model: {args.judge_model}")
         evaluator = QAEvaluator(
             judge_model=args.judge_model,
-            open_router_api_key=LLM_API_KEY
+            open_router_api_key=LLM_API_KEY,
+            extra_body=judge_extra_body,
         )
         
         # Evaluate each model

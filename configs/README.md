@@ -28,6 +28,8 @@ set OPENAI_API_KEY=sk-your-api-key
 set LLM_API_MODE=chat_completions
 ```
 
+Qwen thinking-mode controls are passed through `extra_body`. The Qwen3.7 Plus presets set `{"enable_thinking": false}` for both benchmark calls and judge calls by default. For another DashScope model, add the same field under the relevant `qa`, `object_counting`, or `judge` config section.
+
 ## Presets
 
 | File | Use |

@@ -162,6 +162,7 @@ class OpenRouterAnalyzer:
         skill_library_path: str = "",
         max_skills_per_question: int = 4,
         skill_statuses=None,
+        extra_body=None,
     ) -> Union[str, Dict]:
         """
         Analyze floor plan image using OpenRouter API.
@@ -204,6 +205,7 @@ class OpenRouterAnalyzer:
             base_url=base_url,
             temperature=payload["temperature"],
             response_format=payload.get("response_format"),
+            extra_body=extra_body,
             timeout=timeout or self.timeout,
             max_retries=max_retries or self.max_retries,
             retry_delay=retry_delay or self.retry_delay,
@@ -231,6 +233,7 @@ class OpenRouterAnalyzer:
                 base_url=base_url,
                 temperature=reflection_payload["temperature"],
                 response_format=reflection_payload.get("response_format"),
+                extra_body=extra_body,
                 timeout=timeout or self.timeout,
                 max_retries=max_retries or self.max_retries,
                 retry_delay=retry_delay or self.retry_delay,
@@ -261,6 +264,7 @@ def analyze_floorplan(
     skill_library_path: str = "",
     max_skills_per_question: int = 4,
     skill_statuses=None,
+    extra_body=None,
 ) -> Union[str, Dict]:
     """
     Sends a floor-plan image to an OpenAI-compatible chat-completions endpoint and returns the JSON response.
@@ -293,6 +297,7 @@ def analyze_floorplan(
         skill_library_path=skill_library_path,
         max_skills_per_question=max_skills_per_question,
         skill_statuses=skill_statuses,
+        extra_body=extra_body,
     )
 
 
@@ -310,6 +315,7 @@ def analyze_floorplan_prompt_based(
     skill_library_path: str = "",
     max_skills_per_question: int = 4,
     skill_statuses=None,
+    extra_body=None,
 ) -> Union[str, Dict]:
     """
     Sends a floor-plan image to an OpenAI-compatible chat-completions endpoint.
@@ -345,5 +351,6 @@ def analyze_floorplan_prompt_based(
         skill_library_path=skill_library_path,
         max_skills_per_question=max_skills_per_question,
         skill_statuses=skill_statuses,
+        extra_body=extra_body,
     )
 

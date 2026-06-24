@@ -18,6 +18,9 @@
     "existing_library_path": "",
     "generator_model": "",
     "generator_temperature": 0.0,
+    "generator_extra_body": {
+      "enable_thinking": false
+    },
     "generator_timeout": 90,
     "generator_max_retries": 3,
     "max_cases_per_outcome": 80,

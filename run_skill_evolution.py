@@ -184,6 +184,7 @@ def generate_candidates_from_config(
         temperature=float(config.get("generator_temperature", 0.0)),
         timeout=int(config.get("generator_timeout", 90)),
         max_retries=int(config.get("generator_max_retries", 3)),
+        extra_body=config.get("generator_extra_body"),
     )
     library = generator.generate(
         cases,

@@ -176,6 +176,7 @@ def _call_responses_stream(
     temperature: float,
     response_format: Optional[Dict[str, Any]],
     max_tokens: Optional[int],
+    extra_body: Optional[Dict[str, Any]],
     timeout: int,
 ) -> str:
     """Call an OpenAI Responses-compatible endpoint over SSE."""
@@ -191,6 +192,8 @@ def _call_responses_stream(
         payload["temperature"] = temperature
     if max_tokens is not None:
         payload["max_output_tokens"] = max_tokens
+    if extra_body:
+        payload.update(extra_body)
     text_format = _response_format_to_responses_text(response_format)
     if text_format is not None and _use_responses_text_format():
         payload["text"] = text_format
@@ -238,6 +241,7 @@ def chat_completion_content(
     temperature: float = 0.0,
     response_format: Optional[Dict[str, Any]] = None,
     max_tokens: Optional[int] = None,
+    extra_body: Optional[Dict[str, Any]] = None,
     timeout: int = 60,
     max_retries: int = 3,
     retry_delay: int = 2,
@@ -263,6 +267,8 @@ def chat_completion_content(
             payload["response_format"] = response_format
         if max_tokens is not None:
             payload["max_tokens"] = max_tokens
+        if extra_body:
+            payload["extra_body"] = extra_body
 
     last_error = None
     for attempt in range(max_retries):
@@ -281,6 +287,7 @@ def chat_completion_content(
                     temperature=temperature,
                     response_format=response_format,
                     max_tokens=max_tokens,
+                    extra_body=extra_body,
                     timeout=timeout,
                 )
             else:

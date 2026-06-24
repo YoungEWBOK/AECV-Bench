@@ -39,6 +39,7 @@ class SkillEvolutionGenerator:
         temperature: float = 0.0,
         timeout: int = 90,
         max_retries: int = 3,
+        extra_body: Optional[Dict[str, Any]] = None,
     ):
         self.generator_model = generator_model
         self.api_key = api_key
@@ -46,6 +47,7 @@ class SkillEvolutionGenerator:
         self.temperature = temperature
         self.timeout = timeout
         self.max_retries = max_retries
+        self.extra_body = extra_body
         self.validator = SkillContractValidator()
 
     def generate(
@@ -91,6 +93,7 @@ class SkillEvolutionGenerator:
             base_url=self.base_url,
             temperature=self.temperature,
             response_format={"type": "json_object"},
+            extra_body=self.extra_body,
             timeout=self.timeout,
             max_retries=self.max_retries,
             request_label="Skill evolution candidate generation",

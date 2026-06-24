@@ -163,6 +163,7 @@ def ask_question_with_image(
     task: str = "",
     max_skills_per_question: int = 4,
     skill_statuses=None,
+    extra_body=None,
 ) -> str:
     """
     Send a question with an image to the model and get the answer.
@@ -220,6 +221,7 @@ def ask_question_with_image(
         api_key=open_router_api_key,
         base_url=url,
         temperature=temperature,
+        extra_body=extra_body,
         timeout=60,
         max_retries=3,
         request_label=f"QA image question for '{image_path}'",
@@ -234,6 +236,7 @@ def ask_question_with_image(
         api_key=open_router_api_key,
         base_url=url,
         temperature=temperature,
+        extra_body=extra_body,
         timeout=60,
         max_retries=3,
         request_label=f"QA reflection for '{image_path}'",
@@ -252,6 +255,7 @@ def ask_question_with_image_cohere(
     task: str = "",
     max_skills_per_question: int = 4,
     skill_statuses=None,
+    extra_body=None,
 ) -> str:
     """
     Backward-compatible wrapper for older Cohere-configured models.
@@ -271,10 +275,11 @@ def ask_question_with_image_cohere(
         task=task,
         max_skills_per_question=max_skills_per_question,
         skill_statuses=skill_statuses,
+        extra_body=extra_body,
     )
 
 
-def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, model_name: str, open_router_api_key: str, url: str, temperature: float = 0.0, use_cohere_api: bool = False, cohere_api_key: str = None, prompt_strategy: str = "one_shot", skill_library_path: str = "", max_skills_per_question: int = 4, skill_statuses=None):
+def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, model_name: str, open_router_api_key: str, url: str, temperature: float = 0.0, use_cohere_api: bool = False, cohere_api_key: str = None, prompt_strategy: str = "one_shot", skill_library_path: str = "", max_skills_per_question: int = 4, skill_statuses=None, extra_body=None):
     """
     Process QA pairs from label files and save results.
     
@@ -431,6 +436,7 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
                         task=task,
                         max_skills_per_question=max_skills_per_question,
                         skill_statuses=skill_statuses,
+                        extra_body=extra_body,
                     )
                 else:
                     model_answer = ask_question_with_image(
@@ -446,6 +452,7 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
                         task=task,
                         max_skills_per_question=max_skills_per_question,
                         skill_statuses=skill_statuses,
+                        extra_body=extra_body,
                     )
                 
                 record_result({
@@ -511,6 +518,7 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
                         task=task,
                         max_skills_per_question=max_skills_per_question,
                         skill_statuses=skill_statuses,
+                        extra_body=extra_body,
                     )
                 else:
                     model_answer = ask_question_with_image(
@@ -526,6 +534,7 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
                         task=task,
                         max_skills_per_question=max_skills_per_question,
                         skill_statuses=skill_statuses,
+                        extra_body=extra_body,
                     )
                 
                 record_result({
@@ -590,6 +599,7 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
                         task=task,
                         max_skills_per_question=max_skills_per_question,
                         skill_statuses=skill_statuses,
+                        extra_body=extra_body,
                     )
                 else:
                     model_answer = ask_question_with_image(
@@ -605,6 +615,7 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
                         task=task,
                         max_skills_per_question=max_skills_per_question,
                         skill_statuses=skill_statuses,
+                        extra_body=extra_body,
                     )
                 
                 record_result({
@@ -669,6 +680,7 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
                         task=task,
                         max_skills_per_question=max_skills_per_question,
                         skill_statuses=skill_statuses,
+                        extra_body=extra_body,
                     )
                 else:
                     model_answer = ask_question_with_image(
@@ -684,6 +696,7 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
                         task=task,
                         max_skills_per_question=max_skills_per_question,
                         skill_statuses=skill_statuses,
+                        extra_body=extra_body,
                     )
 
                 record_result({
@@ -748,6 +761,7 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
                         task=task,
                         max_skills_per_question=max_skills_per_question,
                         skill_statuses=skill_statuses,
+                        extra_body=extra_body,
                     )
                 else:
                     model_answer = ask_question_with_image(
@@ -763,6 +777,7 @@ def process_qa_benchmark(labels_dir: str, images_dir: str, output_csv: str, mode
                         task=task,
                         max_skills_per_question=max_skills_per_question,
                         skill_statuses=skill_statuses,
+                        extra_body=extra_body,
                     )
 
                 record_result({
@@ -840,6 +855,7 @@ if __name__ == "__main__":
         skill_library_path = model_config.get("skill_library_path", qa_config.get("skill_library_path", ""))
         max_skills_per_question = int(model_config.get("max_skills_per_question", qa_config.get("max_skills_per_question", 4)))
         skill_statuses = model_config.get("skill_statuses", qa_config.get("skill_statuses", ["accepted"]))
+        extra_body = model_config.get("extra_body", qa_config.get("extra_body"))
         if isinstance(skill_statuses, str):
             skill_statuses = [item.strip() for item in skill_statuses.split(",") if item.strip()]
         
@@ -862,6 +878,8 @@ if __name__ == "__main__":
                 f"  Skill library: {skill_library_path} "
                 f"(statuses={skill_statuses}, max {max_skills_per_question}/question)"
             )
+        if extra_body:
+            print(f"  Extra body: {extra_body}")
         if "note" in model_config:
             print(f"  Note: {model_config['note']}")
         print(f"  Output: {output_csv}")
@@ -888,6 +906,7 @@ if __name__ == "__main__":
                 skill_library_path=skill_library_path,
                 max_skills_per_question=max_skills_per_question,
                 skill_statuses=skill_statuses,
+                extra_body=extra_body,
             )
             results_summary.append({
                 "name": display_name,

@@ -425,6 +425,9 @@ def build_model_configs(model_entries: List[Dict[str, Any]], object_config: Dict
             value = entry.get(key, object_config.get(key))
             if value is not None:
                 request_options["timeout" if key == "request_timeout" else key] = int(value)
+        extra_body = entry.get("extra_body", object_config.get("extra_body"))
+        if extra_body:
+            request_options["extra_body"] = extra_body
         request_options["prompt_strategy"] = prompt_strategy
         skill_library_path = entry.get("skill_library_path", object_config.get("skill_library_path", ""))
         if skill_library_path:
