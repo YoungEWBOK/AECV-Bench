@@ -1,4 +1,4 @@
-{
+﻿{
   "_comment": "QA exploratory strategies for GPT-5.4. These outputs are used as candidate traces for skill evolution.",
   "qa": {
     "images_dir": "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/images",
@@ -21,12 +21,13 @@
   },
   "judge": {
     "_comment": "Use the same judge output directory as the existing GPT-5.4 baseline evaluation.",
-    "model_id": "gpt-4o",
+    "model_id": "qwen3.6-flash",
     "input_dir": "benchmark_result_qa",
-    "output_dir": "results/qa_llm_judge_results",
+    "output_dir": "results/qa_llm_judge_results_unified_qwen36_flash",
     "csv_files": [
       "benchmark_result_qa/qa_results_openai_gpt_54_step_by_step.csv",
       "benchmark_result_qa/qa_results_openai_gpt_54_self_refine.csv"
     ]
   }
 }
+

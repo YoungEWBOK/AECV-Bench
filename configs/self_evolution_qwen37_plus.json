@@ -1,4 +1,4 @@
-{
+﻿{
   "_comment": "Independent supervised skill self-evolution for Qwen3.7 Plus. This does not require baseline or exploration CSVs; it uses labels plus model predictions as feedback.",
   "self_evolution": {
     "output_dir": "results/self_evolution_qwen37_plus",
@@ -18,7 +18,7 @@
       }
     },
     "judge": {
-      "model_id": "qwen3.7-plus",
+      "model_id": "qwen3.6-flash",
       "temperature": 0.0,
       "extra_body": {
         "enable_thinking": false
@@ -49,3 +49,5 @@
     }
   }
 }
+
+

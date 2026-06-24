@@ -1,4 +1,4 @@
-{
+﻿{
   "_comment": "Skill-evolution config for GPT-5.4. It treats one-shot as baseline and exploratory GPT-5.4 strategies as candidate traces.",
   "skill_evolution": {
     "output_dir": "results/skill_evolution_gpt54",
@@ -8,10 +8,10 @@
     "skill_guided_config_path": "configs/qa_gpt54_skill_guided_generated.json",
     "benchmark_config_template": "configs/qa_gpt54_baseline.json",
     "qa_images_dir": "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/images",
-    "baseline_eval_csv": "results/qa_llm_judge_results/openai_gpt_54_evaluation_results.csv",
+    "baseline_eval_csv": "results/qa_llm_judge_results_unified_qwen36_flash/openai_gpt_54_evaluation_results.csv",
     "candidate_eval_csvs": [
-      "results/qa_llm_judge_results/openai_gpt_54_step_by_step_evaluation_results.csv",
-      "results/qa_llm_judge_results/openai_gpt_54_self_refine_evaluation_results.csv"
+      "results/qa_llm_judge_results_unified_qwen36_flash/openai_gpt_54_step_by_step_evaluation_results.csv",
+      "results/qa_llm_judge_results_unified_qwen36_flash/openai_gpt_54_self_refine_evaluation_results.csv"
     ],
     "object_counting_baseline_csv": "",
     "object_counting_candidate_csvs": [],
@@ -23,7 +23,7 @@
     "max_cases_per_outcome": 80,
     "max_skills": 8,
     "max_skills_per_question": 4,
-    "skill_guided_eval_csv": "results/qa_llm_judge_results/openai_gpt_54_skill_guided_evaluation_results.csv",
+    "skill_guided_eval_csv": "results/qa_llm_judge_results_unified_qwen36_flash/openai_gpt_54_skill_guided_evaluation_results.csv",
     "acceptance": {
       "min_net_gain": 1,
       "max_regression_rate": 0.35,
@@ -32,3 +32,4 @@
     }
   }
 }
+

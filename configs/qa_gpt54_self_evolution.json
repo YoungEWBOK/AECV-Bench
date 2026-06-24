@@ -1,4 +1,4 @@
-{
+﻿{
   "_comment": "QA self-evolution / skill-guided experiment for GPT-5.4. Run skill evolution first if results/skill_evolution/candidate_skill_library.json does not exist.",
   "qa": {
     "images_dir": "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/images",
@@ -27,11 +27,12 @@
   },
   "judge": {
     "_comment": "Change model_id if your endpoint uses a different judge model.",
-    "model_id": "gpt-4o",
+    "model_id": "qwen3.6-flash",
     "input_dir": "benchmark_result_qa",
-    "output_dir": "results/qa_llm_judge_results_gpt54_compare",
+    "output_dir": "results/qa_llm_judge_results_unified_qwen36_flash",
     "csv_files": [
       "benchmark_result_qa/qa_results_openai_gpt_54_skill_guided.csv"
     ]
   }
 }
+

@@ -1,4 +1,4 @@
-{
+﻿{
   "_comment": "QA self-evolution / skill-guided experiment for Kimi K2.6. Run run_self_evolution.py first if results/self_evolution_kimi_k26/accepted_skill_library.json does not exist.",
   "qa": {
     "images_dir": "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/images",
@@ -30,14 +30,15 @@
   },
   "judge": {
     "_comment": "Change model_id if your endpoint uses a different judge model.",
-    "model_id": "kimi-k2.6",
+    "model_id": "qwen3.6-flash",
     "extra_body": {
       "enable_thinking": false
     },
     "input_dir": "benchmark_result_qa",
-    "output_dir": "results/qa_llm_judge_results_kimi_k26_compare",
+    "output_dir": "results/qa_llm_judge_results_unified_qwen36_flash",
     "csv_files": [
       "benchmark_result_qa/qa_results_kimi_k26_skill_guided.csv"
     ]
   }
 }
+

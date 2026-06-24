@@ -1,4 +1,4 @@
-{
+﻿{
   "_comment": "Skill-evolution config. This file does not call APIs unless you run generate/evolve without --dry-run and set generator_model.",
   "skill_evolution": {
     "output_dir": "results/skill_evolution",
@@ -8,10 +8,10 @@
     "skill_guided_config_path": "configs/qa_skill_guided_generated.json",
     "benchmark_config_template": "benchmark_config.json",
     "qa_images_dir": "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/images",
-    "baseline_eval_csv": "results/qa_llm_judge_results/api_gemini_31_pro_evaluation_results.csv",
+    "baseline_eval_csv": "results/qa_llm_judge_results_unified_qwen36_flash/api_gemini_31_pro_evaluation_results.csv",
     "candidate_eval_csvs": [
-      "results/qa_llm_judge_results/api_gemini_31_pro_self_refine_evaluation_results.csv",
-      "results/qa_llm_judge_results/api_gemini_31_pro_step_by_step_evaluation_results.csv"
+      "results/qa_llm_judge_results_unified_qwen36_flash/api_gemini_31_pro_self_refine_evaluation_results.csv",
+      "results/qa_llm_judge_results_unified_qwen36_flash/api_gemini_31_pro_step_by_step_evaluation_results.csv"
     ],
     "object_counting_baseline_csv": "",
     "object_counting_candidate_csvs": [],
@@ -32,3 +32,4 @@
     }
   }
 }
+

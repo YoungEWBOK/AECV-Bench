@@ -1,4 +1,4 @@
-{
+﻿{
   "_comment": "Small object-counting prompt-strategy matrix without two-pass reflection.",
   "object_counting": {
     "benchmark_dir": "data/Use Case 1 - Object Counting/1 - Full Datasets",
@@ -45,8 +45,9 @@
     ]
   },
   "judge": {
-    "model_id": "gpt-4o",
+    "model_id": "qwen3.6-flash",
     "input_dir": "benchmark_result_qa",
-    "output_dir": "results/qa_llm_judge_results"
+    "output_dir": "results/qa_llm_judge_results_unified_qwen36_flash"
   }
 }
+
