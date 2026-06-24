@@ -8,7 +8,6 @@
     "extra_body": {
       "enable_thinking": false
     },
-    "stream": true,
     "max_skills_per_question": 4,
     "skill_statuses": [
       "candidate",
@@ -35,7 +34,6 @@
     "extra_body": {
       "enable_thinking": false
     },
-    "stream": true,
     "input_dir": "benchmark_result_qa",
     "output_dir": "results/qa_llm_judge_results_kimi_k26_compare",
     "csv_files": [

@@ -15,16 +15,14 @@
       "temperature": 0.0,
       "extra_body": {
         "enable_thinking": false
-      },
-      "stream": true
+      }
     },
     "judge": {
       "model_id": "kimi-k2.6",
       "temperature": 0.0,
       "extra_body": {
         "enable_thinking": false
-      },
-      "stream": true
+      }
     },
     "initial_library_path": "",
     "accepted_library_path": "results/self_evolution_kimi_k26/accepted_skill_library.json",
@@ -35,7 +33,6 @@
     "generator_extra_body": {
       "enable_thinking": false
     },
-    "generator_stream": true,
     "generator_timeout": 90,
     "generator_max_retries": 3,
     "feedback": {
