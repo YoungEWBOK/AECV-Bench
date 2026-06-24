@@ -40,9 +40,10 @@ Qwen thinking-mode controls are passed through `extra_body`. The Qwen3.7 Plus pr
 | `qa_gpt54_exploration.json` | QA-only GPT-5.4 step-by-step and self-refine traces for skill evolution. |
 | `skill_evolution_gpt54.json` | GPT-5.4-specific skill-evolution config using GPT-5.4 judge CSVs. |
 | `qa_qwen37_plus_baseline.json` | QA-only Qwen3.7 Plus one-shot baseline. |
-| `qa_qwen37_plus_exploration.json` | QA-only Qwen3.7 Plus step-by-step and self-refine traces for skill evolution. |
+| `self_evolution_qwen37_plus.json` | Independent Qwen3.7 Plus supervised skill self-evolution from labels and predictions. |
+| `qa_qwen37_plus_exploration.json` | Optional QA-only Qwen3.7 Plus step-by-step and self-refine traces for prompt ablation diagnostics. |
 | `qa_qwen37_plus_self_evolution.json` | QA-only Qwen3.7 Plus skill-guided/self-evolution run. |
-| `skill_evolution_qwen37_plus.json` | Qwen3.7 Plus-specific skill-evolution config using Qwen judge CSVs. |
+| `skill_evolution_qwen37_plus.json` | Legacy/optional contrastive skill-mining config using Qwen judge CSVs. |
 | `qa_prompt_matrix_mini.json` | QA-only mini matrix: `one_shot`, `step_by_step`, `self_refine`. |
 | `qa_prompt_matrix_with_reflection.json` | QA-only matrix including `two_pass_reflection`. |
 | `object_counting_prompt_matrix_mini.json` | Object-counting mini matrix: `one_shot`, `step_by_step`, `self_refine`, 20 folders. |
@@ -112,14 +113,12 @@ conda run -n exe python run_skill_evolution.py --config configs\skill_evolution_
 conda run -n exe python run_qa_benchmark.py --config configs\qa_gpt54_self_evolution.json
 ```
 
-Compare Qwen3.7 Plus one-shot baseline against skill-guided/self-evolution QA:
+Run independent Qwen3.7 Plus self-evolution, then compare one-shot baseline against evolved skill-guided QA:
 
 ```powershell
+conda run -n exe python run_self_evolution.py --config configs\self_evolution_qwen37_plus.json --dry-run
 conda run -n exe python run_qa_benchmark.py --config configs\qa_qwen37_plus_baseline.json
 conda run -n exe python run_qa_llm_judge_evaluation.py --config configs\qa_qwen37_plus_baseline.json
-conda run -n exe python run_qa_benchmark.py --config configs\qa_qwen37_plus_exploration.json
-conda run -n exe python run_qa_llm_judge_evaluation.py --config configs\qa_qwen37_plus_exploration.json
-conda run -n exe python run_skill_evolution.py --config configs\skill_evolution_qwen37_plus.json evolve --dry-run
 conda run -n exe python run_qa_benchmark.py --config configs\qa_qwen37_plus_self_evolution.json
 conda run -n exe python run_qa_llm_judge_evaluation.py --config configs\qa_qwen37_plus_self_evolution.json
 conda run -n exe python generate_strategy_analysis_report.py --qa-eval-dir results\qa_llm_judge_results_qwen37_plus_compare --object-dir results\object_counting_unused_for_qwen37_plus --output-dir results\strategy_analysis_qwen37_plus

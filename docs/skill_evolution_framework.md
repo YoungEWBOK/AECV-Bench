@@ -1,12 +1,16 @@
 # Skill Evolution Framework
 
-This repo now has a lightweight skill-evolution loop for AEC drawing QA and object counting. It follows the design pattern used by recent self-evolving skill papers without adding DSPy/GEPA dependencies:
+This repo now has two skill-related paths for AEC drawing QA and object
+counting. The primary path is independent supervised self-evolution; the older
+contrastive path remains available only for optional prompt-ablation mining.
+The implementation follows the design pattern used by recent self-evolving
+skill papers without adding DSPy/GEPA dependencies:
 
 - Fixed category ontology, not hand-written concrete skills.
-- Trace/case extraction from benchmark results.
+- Trace/case extraction from supervised label feedback and model predictions.
 - Candidate skill contracts with trigger, preconditions, observations, actions, validator, failure modes, source cases, utility, and lifecycle status.
 - Validation gates for category integrity, required fields, case-answer leakage, and over-specific skills.
-- Replay acceptance gates that accept skills only after a later skill-guided run improves judged results without excessive regressions.
+- Dev replay acceptance gates that accept skills only after a proposal library improves over the current accepted library without excessive regressions.
 
 ## Fixed Categories
 
@@ -36,6 +40,7 @@ modules.
 
 ## Main Files
 
+- `run_self_evolution.py`: independent train/dev label-feedback self-evolution loop.
 - `run_skill_evolution.py`: CLI for building cases, generating candidates, validating, and replay acceptance.
 - `src/skill_evolution/contracts.py`: `SkillContract`, `SkillUtility`, and `SkillLibrary`.
 - `src/skill_evolution/cases.py`: fixed/regressed case builders for QA judge CSVs and object-counting CSVs.
@@ -45,7 +50,37 @@ modules.
 - `src/utils/prompt_strategies.py`: adds `skill_guided`.
 - `run_qa_benchmark.py` and `run_object_counting_benchmark.py`: can consume `skill_library_path`.
 
-## Recommended Loop
+## Recommended Independent Loop
+
+The main loop does not require a baseline or exploration CSV. It uses training
+labels as supervised feedback and keeps baseline only as a final control.
+
+Prepare split manifests only:
+
+```bash
+conda run -n exe python run_self_evolution.py --config configs/self_evolution_qwen37_plus.json prepare-splits
+```
+
+Run self-evolution. `--dry-run` means heuristic skill generation only; the model
+prediction and judge calls still use the configured APIs.
+
+```bash
+conda run -n exe python run_self_evolution.py --config configs/self_evolution_qwen37_plus.json --dry-run
+```
+
+Then run final baseline and evolved-skill comparisons:
+
+```bash
+conda run -n exe python run_qa_benchmark.py --config configs/qa_qwen37_plus_baseline.json
+conda run -n exe python run_qa_llm_judge_evaluation.py --config configs/qa_qwen37_plus_baseline.json
+conda run -n exe python run_qa_benchmark.py --config configs/qa_qwen37_plus_self_evolution.json
+conda run -n exe python run_qa_llm_judge_evaluation.py --config configs/qa_qwen37_plus_self_evolution.json
+```
+
+The evolved library is written to
+`results/self_evolution_qwen37_plus/accepted_skill_library.json`.
+
+## Optional Legacy Contrastive Loop
 
 Build evolution cases from existing baseline and strategy judge CSVs:
 
@@ -85,6 +120,8 @@ conda run -n exe python run_skill_evolution.py --config configs/skill_evolution.
 ```
 
 The accepted library is written to `results/skill_evolution/accepted_skill_library.json`.
+This path is useful for prompt strategy diagnostics, but it is not the primary
+self-evolution loop.
 
 ## Benchmark Config Fields
 

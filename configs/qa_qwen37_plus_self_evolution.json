@@ -1,10 +1,10 @@
 {
-  "_comment": "QA self-evolution / skill-guided experiment for Qwen3.7 Plus. Run skill evolution first if results/skill_evolution_qwen37_plus/candidate_skill_library.json does not exist.",
+  "_comment": "QA self-evolution / skill-guided experiment for Qwen3.7 Plus. Run run_self_evolution.py first if results/self_evolution_qwen37_plus/accepted_skill_library.json does not exist.",
   "qa": {
     "images_dir": "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/images",
     "labels_dir": "data/Use Case 2 - Drawing Understanding/01 - Full Dataset/labels",
     "output_dir": "benchmark_result_qa",
-    "skill_library_path": "results/skill_evolution_qwen37_plus/candidate_skill_library.json",
+    "skill_library_path": "results/self_evolution_qwen37_plus/accepted_skill_library.json",
     "extra_body": {
       "enable_thinking": false
     },
@@ -19,7 +19,7 @@
         "model_id": "qwen3.7-plus",
         "enabled": true,
         "prompt_strategy": "skill_guided",
-        "skill_library_path": "results/skill_evolution_qwen37_plus/candidate_skill_library.json",
+        "skill_library_path": "results/self_evolution_qwen37_plus/accepted_skill_library.json",
         "max_skills_per_question": 4,
         "skill_statuses": [
           "candidate",

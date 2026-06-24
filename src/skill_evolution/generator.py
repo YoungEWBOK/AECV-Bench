@@ -116,7 +116,10 @@ class SkillEvolutionGenerator:
         skills: List[SkillContract] = []
         for category, stats in sorted(
             grouped.items(),
-            key=lambda item: (item[1]["fixed"] - item[1]["regressed"], item[1]["fixed"]),
+            key=lambda item: (
+                item[1]["fixed"] + item[1]["failures"] - item[1]["regressed"],
+                item[1]["fixed"] + item[1]["failures"],
+            ),
             reverse=True,
         ):
             if len(skills) >= max_skills:
@@ -125,11 +128,11 @@ class SkillEvolutionGenerator:
                 continue
             blueprint = HEURISTIC_SKILL_BLUEPRINTS[category]
             utility = SkillUtility(
-                fixed=stats["fixed"],
+                fixed=stats["fixed"] + stats["failures"],
                 regressed=stats["regressed"],
                 support=stats["support"],
-                confidence=_confidence(stats["fixed"], stats["regressed"], stats["support"]),
-                notes="Heuristic dry-run candidate derived from fixed/regressed case clusters.",
+                confidence=_confidence(stats["fixed"] + stats["failures"], stats["regressed"], stats["support"]),
+                notes="Heuristic dry-run candidate derived from training failures and replay contrast clusters.",
             )
             source_cases = [case.case_id for case in stats["examples"][:12]]
             skill = SkillContract(
@@ -151,6 +154,8 @@ class SkillEvolutionGenerator:
                     "category_case_stats": {
                         "fixed": stats["fixed"],
                         "regressed": stats["regressed"],
+                        "failures": stats["failures"],
+                        "correct": stats["correct"],
                         "support": stats["support"],
                     },
                 },
@@ -252,7 +257,9 @@ Generate at most {max_skills} high-precision candidate skills. Favor skills that
 
 
 def _case_utility_by_category(cases: Sequence[EvolutionCase]) -> Dict[str, Dict[str, Any]]:
-    grouped: Dict[str, Dict[str, Any]] = defaultdict(lambda: {"fixed": 0, "regressed": 0, "support": 0, "examples": []})
+    grouped: Dict[str, Dict[str, Any]] = defaultdict(
+        lambda: {"fixed": 0, "regressed": 0, "failures": 0, "correct": 0, "support": 0, "examples": []}
+    )
     for case in cases:
         for category in case.categories:
             grouped[category]["support"] += 1
@@ -260,7 +267,11 @@ def _case_utility_by_category(cases: Sequence[EvolutionCase]) -> Dict[str, Dict[
                 grouped[category]["fixed"] += 1
             elif case.outcome == "regressed":
                 grouped[category]["regressed"] += 1
-            if case.outcome in {"fixed", "regressed"} and len(grouped[category]["examples"]) < 20:
+            elif case.outcome in {"train_wrong", "wrong", "failed", "still_wrong"}:
+                grouped[category]["failures"] += 1
+            elif case.outcome in {"train_correct", "correct", "still_correct"}:
+                grouped[category]["correct"] += 1
+            if case.outcome in {"fixed", "regressed", "train_wrong", "wrong", "failed"} and len(grouped[category]["examples"]) < 20:
                 grouped[category]["examples"].append(case)
     return grouped
 
