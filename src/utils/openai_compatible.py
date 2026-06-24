@@ -48,6 +48,47 @@ def _message_content_to_text(content: Any) -> str:
     return str(content)
 
 
+def _chat_completion_response_to_text(response: Any) -> str:
+    """Extract final assistant text from a chat-completions response."""
+    if response is None:
+        return ""
+    if isinstance(response, str):
+        return response.strip()
+    if isinstance(response, dict):
+        choices = response.get("choices") or []
+        if choices:
+            message = choices[0].get("message") or {}
+            return _message_content_to_text(message.get("content")).strip()
+        return _message_content_to_text(response.get("content")).strip()
+    choices = getattr(response, "choices", None)
+    if choices:
+        message = getattr(choices[0], "message", None)
+        if message is not None:
+            return _message_content_to_text(getattr(message, "content", None)).strip()
+    return _message_content_to_text(response).strip()
+
+
+def _collect_chat_stream_text(response: Any) -> str:
+    """Collect final assistant content from a streamed chat-completions response."""
+    text_parts = []
+    for chunk in response:
+        choices = getattr(chunk, "choices", None)
+        if not choices and isinstance(chunk, dict):
+            choices = chunk.get("choices")
+        if not choices:
+            continue
+        delta = getattr(choices[0], "delta", None)
+        if delta is None and isinstance(choices[0], dict):
+            delta = choices[0].get("delta")
+        if isinstance(delta, dict):
+            content = delta.get("content")
+        else:
+            content = getattr(delta, "content", None)
+        if content:
+            text_parts.append(str(content))
+    return "".join(text_parts).strip()
+
+
 def _chat_content_to_responses_content(content: Any) -> Any:
     """Convert chat-completions content blocks to Responses API content blocks."""
     if isinstance(content, str):
@@ -242,6 +283,8 @@ def chat_completion_content(
     response_format: Optional[Dict[str, Any]] = None,
     max_tokens: Optional[int] = None,
     extra_body: Optional[Dict[str, Any]] = None,
+    stream: bool = False,
+    stream_options: Optional[Dict[str, Any]] = None,
     timeout: int = 60,
     max_retries: int = 3,
     retry_delay: int = 2,
@@ -269,6 +312,10 @@ def chat_completion_content(
             payload["max_tokens"] = max_tokens
         if extra_body:
             payload["extra_body"] = extra_body
+        if stream:
+            payload["stream"] = True
+            if stream_options:
+                payload["stream_options"] = stream_options
 
     last_error = None
     for attempt in range(max_retries):
@@ -292,7 +339,10 @@ def chat_completion_content(
                 )
             else:
                 response = client.chat.completions.create(**payload)
-                content = _message_content_to_text(response.choices[0].message.content)
+                if stream:
+                    content = _collect_chat_stream_text(response)
+                else:
+                    content = _chat_completion_response_to_text(response)
 
             if content:
                 return content
