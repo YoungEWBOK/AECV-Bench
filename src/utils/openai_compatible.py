@@ -68,25 +68,137 @@ def _chat_completion_response_to_text(response: Any) -> str:
     return _message_content_to_text(response).strip()
 
 
+def _object_to_dict(value: Any) -> Dict[str, Any]:
+    """Best-effort conversion for OpenAI SDK/Pydantic response objects."""
+    if isinstance(value, dict):
+        return value
+    for attr in ("model_dump", "dict", "to_dict"):
+        method = getattr(value, attr, None)
+        if callable(method):
+            try:
+                data = method()
+                if isinstance(data, dict):
+                    return data
+            except Exception:
+                pass
+    return {}
+
+
+def _field_value(value: Any, field: str) -> Any:
+    if isinstance(value, dict):
+        return value.get(field)
+    direct = getattr(value, field, None)
+    if direct is not None:
+        return direct
+    extra = getattr(value, "model_extra", None)
+    if isinstance(extra, dict):
+        return extra.get(field)
+    return None
+
+
+def _extract_text_delta(value: Any) -> str:
+    """Extract a final-answer text delta from varied chat stream chunk shapes."""
+    if value is None:
+        return ""
+    if isinstance(value, bytes):
+        return value.decode("utf-8", errors="replace")
+    if isinstance(value, str):
+        return value
+    if isinstance(value, list):
+        return _message_content_to_text(value)
+
+    for field in ("content", "text", "output_text"):
+        text = _field_value(value, field)
+        if text:
+            return _message_content_to_text(text)
+
+    data = _object_to_dict(value)
+    for field in ("content", "text", "output_text"):
+        text = data.get(field)
+        if text:
+            return _message_content_to_text(text)
+    return ""
+
+
+def _extract_reasoning_delta(value: Any) -> str:
+    """Extract reasoning text only as a last-resort fallback."""
+    if value is None:
+        return ""
+    for field in ("reasoning_content", "reasoning", "reasoning_text"):
+        text = _field_value(value, field)
+        if text:
+            return _message_content_to_text(text)
+    data = _object_to_dict(value)
+    for field in ("reasoning_content", "reasoning", "reasoning_text"):
+        text = data.get(field)
+        if text:
+            return _message_content_to_text(text)
+    return ""
+
+
+def _debug_stream_chunk(chunk: Any, index: int) -> None:
+    if not _debug_chat_stream():
+        return
+    if index >= int(os.getenv("LLM_STREAM_DEBUG_LIMIT", "3")):
+        return
+    data = _object_to_dict(chunk)
+    if data:
+        preview = json.dumps(data, ensure_ascii=False)[:1000]
+    else:
+        preview = repr(chunk)[:1000]
+    print(f"[STREAM DEBUG] chunk {index}: {preview}", flush=True)
+
+
+def _debug_chat_stream() -> bool:
+    value = os.getenv("LLM_STREAM_DEBUG", "").strip().lower()
+    return value in {"1", "true", "yes", "on"}
+
+
 def _collect_chat_stream_text(response: Any) -> str:
     """Collect final assistant content from a streamed chat-completions response."""
+    if response is None:
+        return ""
+    if isinstance(response, bytes):
+        return response.decode("utf-8", errors="replace").strip()
+    if isinstance(response, str):
+        return response.strip()
+
     text_parts = []
-    for chunk in response:
-        choices = getattr(chunk, "choices", None)
-        if not choices and isinstance(chunk, dict):
-            choices = chunk.get("choices")
-        if not choices:
+    reasoning_fallback_parts = []
+    for index, chunk in enumerate(response):
+        _debug_stream_chunk(chunk, index)
+        if isinstance(chunk, bytes):
+            text_parts.append(chunk.decode("utf-8", errors="replace"))
             continue
-        delta = getattr(choices[0], "delta", None)
-        if delta is None and isinstance(choices[0], dict):
-            delta = choices[0].get("delta")
-        if isinstance(delta, dict):
-            content = delta.get("content")
-        else:
-            content = getattr(delta, "content", None)
+        if isinstance(chunk, str):
+            text_parts.append(chunk)
+            continue
+
+        choices = _field_value(chunk, "choices")
+        if not choices:
+            text = _extract_text_delta(chunk)
+            if text:
+                text_parts.append(text)
+            else:
+                reasoning = _extract_reasoning_delta(chunk)
+                if reasoning:
+                    reasoning_fallback_parts.append(reasoning)
+            continue
+
+        first_choice = choices[0]
+        delta = _field_value(first_choice, "delta") or _field_value(first_choice, "message") or first_choice
+        content = _extract_text_delta(delta)
         if content:
-            text_parts.append(str(content))
-    return "".join(text_parts).strip()
+            text_parts.append(content)
+        else:
+            reasoning = _extract_reasoning_delta(delta)
+            if reasoning:
+                reasoning_fallback_parts.append(reasoning)
+
+    content_text = "".join(text_parts).strip()
+    if content_text:
+        return content_text
+    return "".join(reasoning_fallback_parts).strip()
 
 
 def _chat_content_to_responses_content(content: Any) -> Any:
