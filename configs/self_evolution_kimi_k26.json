@@ -18,7 +18,7 @@
       }
     },
     "judge": {
-      "model_id": "qwen3.6-flash",
+      "model_id": "qwen3.7-max",
       "temperature": 0.0,
       "extra_body": {
         "enable_thinking": false

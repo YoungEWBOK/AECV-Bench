@@ -52,9 +52,9 @@
     ]
   },
   "judge": {
-    "model_id": "qwen3.6-flash",
+    "model_id": "qwen3.7-max",
     "input_dir": "benchmark_result_qa",
-    "output_dir": "results/qa_llm_judge_results_unified_qwen36_flash"
+    "output_dir": "results/qa_llm_judge_results_unified_qwen37_max"
   }
 }
 

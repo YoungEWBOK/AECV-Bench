@@ -15,9 +15,9 @@
   },
   "judge": {
     "_comment": "Change model_id if your endpoint uses a different judge model.",
-    "model_id": "qwen3.6-flash",
+    "model_id": "qwen3.7-max",
     "input_dir": "benchmark_result_qa",
-    "output_dir": "results/qa_llm_judge_results_unified_qwen36_flash",
+    "output_dir": "results/qa_llm_judge_results_unified_qwen37_max",
     "csv_files": [
       "benchmark_result_qa/qa_results_openai_gpt_54.csv"
     ]

@@ -30,10 +30,10 @@ set LLM_API_MODE=chat_completions
 
 Thinking-mode controls are passed through `extra_body`. The DashScope presets set `{"enable_thinking": false}` by default.
 
-All QA judge presets use the same text-only judge model, `qwen3.6-flash`, and write to the same ranking directory:
+All QA judge presets use the same text-only judge model, `qwen3.7-max`, and write to the same ranking directory:
 
 ```text
-results/qa_llm_judge_results_unified_qwen36_flash
+results/qa_llm_judge_results_unified_qwen37_max
 ```
 
 This keeps baseline and skill-guided results from different tested models in one comparable leaderboard.
@@ -115,7 +115,7 @@ conda run -n exe python run_qa_benchmark.py --config configs\qa_gpt54_baseline.j
 conda run -n exe python run_qa_benchmark.py --config configs\qa_gpt54_self_evolution.json
 conda run -n exe python run_qa_llm_judge_evaluation.py --config configs\qa_gpt54_baseline.json
 conda run -n exe python run_qa_llm_judge_evaluation.py --config configs\qa_gpt54_self_evolution.json
-conda run -n exe python generate_strategy_analysis_report.py --qa-eval-dir results\qa_llm_judge_results_unified_qwen36_flash --object-dir results\object_counting_unused_for_gpt54 --output-dir results\strategy_analysis_gpt54
+conda run -n exe python generate_strategy_analysis_report.py --qa-eval-dir results\qa_llm_judge_results_unified_qwen37_max --object-dir results\object_counting_unused_for_gpt54 --output-dir results\strategy_analysis_gpt54
 ```
 
 Build a GPT-5.4 self-evolution skill library from GPT-5.4 traces:
@@ -135,7 +135,7 @@ conda run -n exe python run_qa_benchmark.py --config configs\qa_qwen37_plus_base
 conda run -n exe python run_qa_llm_judge_evaluation.py --config configs\qa_qwen37_plus_baseline.json
 conda run -n exe python run_qa_benchmark.py --config configs\qa_qwen37_plus_self_evolution.json
 conda run -n exe python run_qa_llm_judge_evaluation.py --config configs\qa_qwen37_plus_self_evolution.json
-conda run -n exe python generate_strategy_analysis_report.py --qa-eval-dir results\qa_llm_judge_results_unified_qwen36_flash --object-dir results\object_counting_unused_for_qwen37_plus --output-dir results\strategy_analysis_qwen37_plus
+conda run -n exe python generate_strategy_analysis_report.py --qa-eval-dir results\qa_llm_judge_results_unified_qwen37_max --object-dir results\object_counting_unused_for_qwen37_plus --output-dir results\strategy_analysis_qwen37_plus
 ```
 
 Run the same independent self-evolution comparison for DeepSeek V4 Pro:
